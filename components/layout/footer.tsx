@@ -11,7 +11,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center mb-4">
               <Hotel className="w-6 h-6 mr-2" />
-              <span className="font-playfair text-xl font-bold">LuxStay</span>
+              <span className="font-playfair text-xl font-bold">BharatTrips</span>
             </div>
             <p className="text-primary-foreground/80 mb-4">
               Discover extraordinary stays at exceptional properties worldwide. Experience luxury, comfort, and unforgettable moments.
@@ -80,7 +80,7 @@ const Footer = () => {
               <li className="flex">
                 <Mail className="w-5 h-5 mr-2 flex-shrink-0" />
                 <span className="text-primary-foreground/80">
-                  info@luxstay.com
+                  info@BharatTrips.com
                 </span>
               </li>
             </ul>
@@ -112,7 +112,7 @@ const Footer = () => {
         <div className="mt-12 pt-6 border-t border-primary-foreground/20">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-primary-foreground/80 text-sm mb-4 md:mb-0">
-              &copy; {new Date().getFullYear()} LuxStay. All rights reserved.
+              &copy; {new Date().getFullYear()} BharatTrips. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
               <Link href="/privacy" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">

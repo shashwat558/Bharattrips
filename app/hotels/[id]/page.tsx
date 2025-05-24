@@ -32,6 +32,7 @@ import ReservationBox from '@/components/hotels/reservation-box'
 import SimilarHotels from '@/components/hotels/similar-hotels'
 
 // This would come from an API in a real app
+
 const hotelData = {
   id: 1,
   name: "Grand Plaza Hotel & Spa",
@@ -122,7 +123,16 @@ const hotelData = {
   ]
 };
 
-// Map amenity names to icons
+export async function generateStaticParams() {
+  return [{ id: hotelData.id.toString() }];
+}
+
+const getHotelById = (id: string) => {
+  
+  if (hotelData.id.toString() === id) return hotelData;
+  return null;
+};
+
 const getAmenityIcon = (icon: string) => {
   switch(icon) {
     case 'wifi':
@@ -153,7 +163,9 @@ const getAmenityIcon = (icon: string) => {
 };
 
 export default function HotelDetailPage({ params }: { params: { id: string } }) {
-  const hotel = hotelData; // In a real app, we would fetch the hotel by ID
+   const hotel = getHotelById(params.id);
+
+  if (!hotel) return <div>Hotel not found</div>; // In a real app, we would fetch the hotel by ID
   
   return (
     <>

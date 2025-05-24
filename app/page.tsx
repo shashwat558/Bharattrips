@@ -123,7 +123,7 @@ export default function Home() {
       <section className="section-padding">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="font-playfair text-3xl md:text-4xl font-bold mb-4">Why Choose LuxStay</h2>
+            <h2 className="font-playfair text-3xl md:text-4xl font-bold mb-4">Why Choose BharatTrips</h2>
             <p className="text-muted-foreground">
               We provide an exceptional booking experience with carefully curated properties and premium service
             </p>

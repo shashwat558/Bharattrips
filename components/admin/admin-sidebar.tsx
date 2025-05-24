@@ -48,7 +48,7 @@ const AdminSidebar = () => {
           <div className="flex items-center px-6 h-16">
             <Link href="/admin" className="flex items-center">
               <Hotel className="h-6 w-6 text-primary mr-2" />
-              <span className="font-playfair text-xl font-bold">LuxStay</span>
+              <span className="font-playfair text-xl font-bold">BharatTrips</span>
               <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded ml-2">Admin</span>
             </Link>
           </div>
@@ -97,7 +97,7 @@ const AdminSidebar = () => {
               <div className="flex items-center px-6 h-16 border-b">
                 <Link href="/admin" className="flex items-center">
                   <Hotel className="h-6 w-6 text-primary mr-2" />
-                  <span className="font-playfair text-xl font-bold">LuxStay</span>
+                  <span className="font-playfair text-xl font-bold">BharatTrips</span>
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded ml-2">Admin</span>
                 </Link>
               </div>

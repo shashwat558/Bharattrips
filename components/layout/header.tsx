@@ -38,14 +38,14 @@ const Header = () => {
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
       isScrolled || isAdminPage || isMobileMenuOpen 
         ? "bg-background border-b shadow-sm" 
-        : "bg-transparent text-white"
+        : "bg-transparent "
     )}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Hotel className="w-6 h-6 mr-2" />
-            <span className="font-playfair text-xl font-bold">LuxStay</span>
+            <span className="font-playfair text-xl font-bold">BharatTrips</span>
           </Link>
           
           {/* Desktop Navigation */}
@@ -69,9 +69,8 @@ const Header = () => {
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="outline" className={cn(
-                    "border-primary",
-                    !isScrolled && !isAdminPage ? "text-white border-white hover:bg-white/10" : ""
+                  <Button className={cn(
+                    !isScrolled && !isAdminPage ? "bg-white text-primary hover:bg-white/90" : ""
                   )}>
                     Login
                   </Button>
@@ -148,7 +147,7 @@ interface NavLinkProps {
 const NavLink = ({ href, label, isScrolled, isAdminPage }: NavLinkProps) => {
   const pathname = usePathname()
   const isActive = pathname === href || (href !== '/' && pathname.startsWith(href))
-  
+
   return (
     <Link
       href={href}
@@ -157,14 +156,15 @@ const NavLink = ({ href, label, isScrolled, isAdminPage }: NavLinkProps) => {
         isActive 
           ? "bg-primary/10 text-primary" 
           : isScrolled || isAdminPage 
-            ? "text-foreground hover:bg-muted" 
-            : "text-white hover:bg-white/10"
+            ? "text-zinc-900 dark:text-foreground hover:bg-muted" 
+            : "dark:text-zinc-300 text-gray-800 hover:bg-white/10"
       )}
     >
       {label}
     </Link>
   )
 }
+
 
 interface NavMobileLinkProps {
   href: string
