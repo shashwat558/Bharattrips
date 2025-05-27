@@ -14,7 +14,7 @@ const Footer = () => {
               <span className="font-playfair text-xl font-bold">BharatTrips</span>
             </div>
             <p className="text-primary-foreground/80 mb-4">
-              Discover extraordinary stays at exceptional properties worldwide. Experience luxury, comfort, and unforgettable moments.
+              Discover extraordinary stays at exceptional properties across India. Experience luxury, comfort, and unforgettable moments.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
@@ -68,19 +68,19 @@ const Footer = () => {
               <li className="flex">
                 <MapPin className="w-5 h-5 mr-2 flex-shrink-0" />
                 <span className="text-primary-foreground/80">
-                  123 Luxury Avenue, Suite 456, New York, NY 10001
+                  123 Business Hub, Sector 1, Gurugram, Haryana 122001
                 </span>
               </li>
               <li className="flex">
                 <Phone className="w-5 h-5 mr-2 flex-shrink-0" />
                 <span className="text-primary-foreground/80">
-                  +1 (555) 123-4567
+                  +91 98765 43210
                 </span>
               </li>
               <li className="flex">
                 <Mail className="w-5 h-5 mr-2 flex-shrink-0" />
                 <span className="text-primary-foreground/80">
-                  info@BharatTrips.com
+                  info@bharattrips.com
                 </span>
               </li>
             </ul>

@@ -4,6 +4,7 @@ import { Poppins } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
+import AuthProvider from '@/components/AuthProvider';
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.className} font-sans`}>
+        <AuthProvider />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

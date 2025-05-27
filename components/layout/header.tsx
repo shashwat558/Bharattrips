@@ -43,7 +43,7 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center dark:text-gray-300 text-gray-900">
             <Hotel className="w-6 h-6 mr-2" />
             <span className="font-playfair text-xl font-bold">BharatTrips</span>
           </Link>
@@ -157,7 +157,7 @@ const NavLink = ({ href, label, isScrolled, isAdminPage }: NavLinkProps) => {
           ? "bg-primary/10 text-primary" 
           : isScrolled || isAdminPage 
             ? "text-zinc-900 dark:text-foreground hover:bg-muted" 
-            : "dark:text-zinc-300 text-gray-800 hover:bg-white/10"
+            : "dark:text-zinc-300 text-gray-900 hover:bg-white/10"
       )}
     >
       {label}
