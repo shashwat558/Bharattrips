@@ -4,33 +4,28 @@ import { useAuth } from '@/stores/useAuth'
 import { useEffect } from 'react'
 
 const AuthProvider = () => {
-    const {setUser}  = useAuth();
+    const { setUser } = useAuth()
+    const supabase = createClient()
 
     useEffect(() => {
-        const supabase = createClient();
-
-        const getSession = async () => {
-            const {data: {user}, error} = await supabase.auth.getUser();
-            setUser(user);
-            if(error){
-                console.error(error);
-            }
+        const getUser = async () => {
+            const { data: { user }, error } = await supabase.auth.getUser()
+            if (error) console.error('User fetch error:', error)
+            else setUser(user)
         }
-        getSession()
 
-        const {data} = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
+        getUser()
 
-        }) 
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null)
+        })
 
         return () => {
-            data.subscription?.unsubscribe()
+            subscription.unsubscribe()
         }
-    },[setUser])
+    }, [setUser, supabase.auth])
 
-
-  return null 
-  
+    return null
 }
 
 export default AuthProvider

@@ -12,6 +12,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Mail, Lock, Hotel } from 'lucide-react'
+import { useAuth } from '@/stores/useAuth'
+import { signInWithEmail } from '@/action'
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -21,13 +23,15 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter()
+  const {user} = useAuth();
+  console.log(user?.id)
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema)
   })
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log(data)
-    // In a real app, this would make an API call
+    await signInWithEmail({email: data.email, password: data.password})
     router.push('/profile')
   }
 

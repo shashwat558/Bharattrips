@@ -129,7 +129,7 @@ const BookingPage = ({ params }: { params: { id: string } }) => {
       </Link>
       
       <h1 className="font-playfair text-3xl font-bold mb-2">Complete Your Booking</h1>
-      <p className="text-muted-foreground mb-8">You're almost there! Please fill in the details below to secure your reservation.</p>
+      <p className="text-muted-foreground mb-8">You&apos;re almost there! Please fill in the details below to secure your reservation.</p>
       
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Main Booking Form */}

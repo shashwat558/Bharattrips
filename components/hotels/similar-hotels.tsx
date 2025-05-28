@@ -92,7 +92,7 @@ const SimilarHotels = ({ currentHotelId }: SimilarHotelsProps) => {
                 ))}
               </div>
               <div className="absolute bottom-4 right-4">
-                <Badge variant="primary" className="bg-primary text-white">
+                <Badge variant="default" className="bg-primary text-white">
                   ${hotel.price}/night
                 </Badge>
               </div>

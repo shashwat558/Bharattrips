@@ -30,7 +30,7 @@ const Newsletter = () => {
           {isSubmitted ? (
             <div className="bg-background text-foreground rounded-lg p-6 animate-fade-in">
               <h3 className="font-bold text-xl mb-2">Thank You for Subscribing!</h3>
-              <p>You'll be the first to know about our special offers and promotions.</p>
+              <p>You&apos;ll be the first to know about our special offers and promotions.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">

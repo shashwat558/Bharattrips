@@ -12,6 +12,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { User, Mail, Lock, Hotel } from 'lucide-react'
+import { signUpWithPassword } from '@/action'
+
+
+
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -29,10 +33,11 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema)
   })
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log(data)
-    // In a real app, this would make an API call
-    router.push('/profile')
+    await signUpWithPassword({ email: data.email, password: data.password })
+
+    router.push('/check-email');
   }
 
   return (
@@ -151,9 +156,7 @@ export default function RegisterPage() {
               <Button variant="outline" type="button" className="w-full">
                 Google
               </Button>
-              <Button variant="outline" type="button" className="w-full">
-                Apple
-              </Button>
+              
             </div>
 
             <p className="text-center text-sm text-muted-foreground">

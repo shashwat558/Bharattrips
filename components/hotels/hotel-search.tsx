@@ -105,7 +105,9 @@ const HotelSearch = ({ initialParams }: HotelSearchProps) => {
                 selected={dateRange}
                 onSelect={(range) => {
                   if (range?.from && range?.to) {
-                    setDateRange(range);
+                    if (range?.from && range?.to) {
+                      setDateRange({ from: range.from, to: range.to });
+                    }
                   }
                 }}
                 numberOfMonths={2}
