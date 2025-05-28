@@ -162,8 +162,9 @@ const getAmenityIcon = (icon: string) => {
   }
 };
 
-export default function HotelDetailPage({ params }: { params: { id: string } }) {
-   const hotel = getHotelById(params.id);
+export default async function HotelDetailPage({params}: {params: Promise<{id: string}>}) {
+  const {id} = await params;
+   const hotel = getHotelById(id);
 
   if (!hotel) return <div>Hotel not found</div>; // In a real app, we would fetch the hotel by ID
   

@@ -24,9 +24,10 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-[85vh] min-h-[600px] hero-overlay">
         <Image
-          src="https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg"
+          src="/heroImage.jpeg"
           alt="Luxury Hotel"
           fill
+
           className="object-cover"
           priority
         />

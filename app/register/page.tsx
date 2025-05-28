@@ -12,7 +12,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { User, Mail, Lock, Hotel } from 'lucide-react'
-import { signUpWithPassword } from '@/action'
+import { signup } from '@/action'
+
 
 
 
@@ -35,7 +36,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: any) => {
     console.log(data)
-    await signUpWithPassword({ email: data.email, password: data.password })
+    await signup({ email: data.email, password: data.password })
 
     router.push('/check-email');
   }

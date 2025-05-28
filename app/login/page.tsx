@@ -13,7 +13,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Mail, Lock, Hotel } from 'lucide-react'
 import { useAuth } from '@/stores/useAuth'
-import { signInWithEmail } from '@/action'
+import { login } from '@/action'
+
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -31,8 +32,9 @@ export default function LoginPage() {
 
   const onSubmit = async (data: any) => {
     console.log(data)
-    await signInWithEmail({email: data.email, password: data.password})
-    router.push('/profile')
+    await login(data)
+
+    router.push('/profile');
   }
 
   return (

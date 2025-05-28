@@ -1,8 +1,6 @@
-import { useAuth } from "@/stores/useAuth";
-
+"use client"
 export default function CheckEmailPage() {
-    const {user} = useAuth();
-    
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="text-center max-w-md">

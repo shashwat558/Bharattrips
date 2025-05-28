@@ -4,6 +4,7 @@
 
 import { createClientServer } from "@/lib/utils/supabase/server"
 import { supabase } from "@/supabase";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 //@ts-ignore
@@ -29,23 +30,41 @@ const signInWIth = provider => async () => {
 export const signInWIthGoogle = signInWIth('google');
 
 
-export const signUpWithPassword = async ({email, password}: {email: string, password: string}) => {
-    const supabase = await createClientServer();
-    const {data, error} = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-            emailRedirectTo: "http://localhost:3000/check-email"
-        }
-    })
+
+
+export async function login(data: SignupInput) {
+  const supabase = await createClientServer()
+
+  // type-casting here for convenience
+  // in practice, you should validate your inputs
+  
+
+  const { error } = await supabase.auth.signInWithPassword(data)
+
+  if (error) {
+    redirect('/error')
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/')
 }
 
-export async function signInWithEmail({email, password}: {email: string, password: string}) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password,
-  })
-  return data;
+type SignupInput = {
+  email: string
+  password: string
+}
+
+export async function signup(data: SignupInput) {
+  const supabase = await createClientServer()
+
+  const { error } = await supabase.auth.signUp(data)
+
+  if (error) {
+    redirect('/error')
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/')
 }
 
 export const signOut = async () => {

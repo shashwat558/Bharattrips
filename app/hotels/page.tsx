@@ -105,12 +105,15 @@ const getAmenityIcon = (amenity: string) => {
   }
 };
 
-export default function HotelsPage({
+type Props = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+export default async function HotelsPage({
   searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
+}: Props) {
   // In a real app, we would use searchParams to filter the hotels
+  const resolvedSearchParams = await searchParams
   
   return (
     <>
@@ -124,7 +127,7 @@ export default function HotelsPage({
               Discover handpicked luxury hotels and resorts worldwide
             </p>
             
-            <HotelSearch initialParams={searchParams} />
+            <HotelSearch initialParams={resolvedSearchParams} />
           </div>
         </div>
       </div>
