@@ -110,7 +110,7 @@ const Header = () => {
             <NavMobileLink href="/" label="Home" onClick={() => setIsMobileMenuOpen(false)} />
             <NavMobileLink href="/hotels" label="Hotels" onClick={() => setIsMobileMenuOpen(false)} />
             <NavMobileLink href="/about" label="About" onClick={() => setIsMobileMenuOpen(false)} />
-            <NavMobileLink href="/contact" label="Contact" onClick={() => setIsMobileMenuOpen(false)} />
+            
             {isAdminPage && (
               <NavMobileLink href="/admin" label="Dashboard" onClick={() => setIsMobileMenuOpen(false)} />
             )}
