@@ -18,6 +18,7 @@ import { signup } from '@/action'
 
 
 
+
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -30,16 +31,16 @@ const registerSchema = z.object({
 
 export default function RegisterPage() {
   const router = useRouter()
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema)
   })
 
-  const onSubmit = async (data: any) => {
-    console.log(data)
+    const onSubmit = async (data: z.infer<typeof registerSchema>) => {
     await signup({ email: data.email, password: data.password })
-
-    router.push('/check-email');
-  }
+    
+      router.push('/check-email');
+    
+  };
 
   return (
     <div className="min-h-screen flex">

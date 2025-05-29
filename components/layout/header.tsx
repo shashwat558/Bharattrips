@@ -12,15 +12,21 @@ import {
   Car, 
   MapPin,
   Menu,
-  X
+  X,
+  User2,
+  DoorOpen
 } from 'lucide-react'
 import { ModeToggle } from '@/components/mode-toggle'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/stores/useAuth'
+import { signOut } from '@/action'
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
+  const {user, setUser} = useAuth();
+
   
   const isAdminPage = pathname.startsWith('/admin')
   
@@ -68,20 +74,29 @@ const Header = () => {
               </Link>
             ) : (
               <>
-                <Link href="/login">
-                  <Button className={cn(
+                <Link href={user?"/profile" : "/login"}>
+                  {user ? <Button>
+                    <User2 className='w-5 h-4'/>
+                  </Button>:<Button className={cn(
                     !isScrolled && !isAdminPage ? "bg-white text-primary hover:bg-white/90" : ""
                   )}>
                     Login
-                  </Button>
+                  </Button>}
                 </Link>
-                <Link href="/register">
-                  <Button className={cn(
+                
+                  {user &&<Button className={cn(
                     !isScrolled && !isAdminPage ? "bg-white text-primary hover:bg-white/90" : ""
-                  )}>
-                    Register
-                  </Button>
-                </Link>
+                  )} onClick={async () => {
+                      try {
+                        await signOut()
+                        setUser(null)
+                      } catch (error) {
+                        console.error('Error during sign out:', error)
+                      }
+                    }}>
+                    <DoorOpen className='w-5 h-5'/>
+                  </Button>}
+                
               </>
             )}
           </div>

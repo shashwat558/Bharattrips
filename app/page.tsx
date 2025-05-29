@@ -1,3 +1,4 @@
+"use client"
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -17,8 +18,13 @@ import HeroSearch from '@/components/home/hero-search'
 import FeaturedProperties from '@/components/home/featured-properties'
 import Testimonials from '@/components/home/testimonials'
 import Newsletter from '@/components/home/newsletter'
+import { useAuth } from '@/stores/useAuth'
+
+
 
 export default function Home() {
+  const {user} = useAuth();
+  console.log(user?.email)
   return (
     <>
       {/* Hero Section */}

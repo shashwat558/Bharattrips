@@ -3,7 +3,7 @@
 
 
 import { createClientServer } from "@/lib/utils/supabase/server"
-import { supabase } from "@/supabase";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -68,5 +68,6 @@ export async function signup(data: SignupInput) {
 }
 
 export const signOut = async () => {
+    const supabase = await createClientServer();
     return await supabase.auth.signOut();
 }

@@ -13,6 +13,7 @@ const AuthProvider = () => {
       if (error) {
         console.error('User fetch error:', error)
       } else {
+        console.log(user)
         setUser(user)
       }
     }

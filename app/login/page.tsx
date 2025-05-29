@@ -14,6 +14,7 @@ import * as z from 'zod'
 import { Mail, Lock, Hotel } from 'lucide-react'
 import { useAuth } from '@/stores/useAuth'
 import { login } from '@/action'
+import { createClient } from '@/lib/utils/supabase/client'
 
 
 const loginSchema = z.object({
@@ -24,6 +25,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter()
+  
   const {user} = useAuth();
   console.log(user?.id)
   const { register, handleSubmit, formState: { errors } } = useForm({
@@ -31,11 +33,18 @@ export default function LoginPage() {
   })
 
   const onSubmit = async (data: any) => {
-    console.log(data)
-    await login(data)
+  const supabase = createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: data.email,
+    password: data.password
+  })
 
-    router.push('/profile');
+  if (error) {
+    console.error('Login error:', error.message)
+  } else {
+    router.push('/') 
   }
+}
 
   return (
     <div className="min-h-screen flex">
