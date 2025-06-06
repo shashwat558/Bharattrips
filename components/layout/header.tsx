@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { 
   User, 
@@ -21,12 +21,19 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/stores/useAuth'
 import { signOut } from '@/action'
 
+
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const {user, setUser} = useAuth();
+  const location = window.location
+  const locationarray = location.href.split('/');
+  
 
+  
+
+  
   
   const isAdminPage = pathname.startsWith('/admin')
   
@@ -38,6 +45,8 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  if(locationarray.includes("list-property")) return null;
 
   return (
     <header className={cn(
@@ -84,7 +93,16 @@ const Header = () => {
                   </Button>}
                 </Link>
                 
-                  {user &&<Button className={cn(
+                  {user &&
+                  <>
+                  <Link href={"/list-property"} className=''>               
+                  <Button variant={"default"}>
+                    Become a partner?
+
+                  </Button>
+                  
+                  </Link>
+                  <Button className={cn(
                     !isScrolled && !isAdminPage ? "bg-white text-primary hover:bg-white/90" : ""
                   )} onClick={async () => {
                       try {
@@ -95,7 +113,8 @@ const Header = () => {
                       }
                     }}>
                     <DoorOpen className='w-5 h-5'/>
-                  </Button>}
+                  </Button>
+                  </>}
                 
               </>
             )}

@@ -54,15 +54,40 @@ type SignupInput = {
   password: string
 }
 
-export async function signup(data: SignupInput) {
+export async function signup(signUpData: SignupInput) {
   const supabase = await createClientServer()
 
-  const { error } = await supabase.auth.signUp(data)
+  
+  const { data: existingUser } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', signUpData.email)
+    .maybeSingle()
 
-  if (error) {
-    redirect('/error')
+  if (existingUser) {
+    redirect('/already-registered')
   }
 
+ 
+  const { data, error } = await supabase.auth.signUp({
+    email: signUpData.email,
+    password: signUpData.password,
+  })
+
+  if (error) {
+    console.error('Signup error:', error.message)
+    redirect('/error') 
+  }
+
+  
+  if (data.user) {
+    await supabase.from('users').insert({
+      id: data.user.id,
+      email: data.user.email,
+    })
+  }
+
+  
   revalidatePath('/', 'layout')
   redirect('/')
 }
