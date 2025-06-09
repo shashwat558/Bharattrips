@@ -129,14 +129,69 @@ export async function savePropertySetup({propertyId,bedrooms, beds, bathrooms, m
         allow_smoking: allowSmoking,
         step_completed: "property-setup"
 
-    }).eq('id', propertyId);
+    }).eq('id', propertyId).select('id');
 
     if(error || !data){
         console.log("-------------------------------------------------------", error?.code, error?.cause, error?.details, error?.hint)
         throw new Error("failed to save property info");
     }
 
-    return data[0];
+    
 
 
+}
+
+export async function saveAmenities({
+      propertyId,
+      wifi,
+      ac,
+      tv,
+      kitchen,
+      workspace,
+      parking,
+      pool,
+      gym,
+      breakfast,
+      roomService,
+      restaurant,
+      bar,
+      spa,
+      laundry,
+}: {
+    propertyId: string,
+    wifi: boolean,
+      ac: boolean,
+      tv:boolean,
+      kitchen:boolean,
+      workspace:boolean,
+      parking:boolean,
+      pool:boolean,
+      gym:boolean,
+      breakfast:boolean,
+      roomService:boolean,
+      restaurant:boolean,
+      bar:boolean,
+      spa:boolean,
+      laundry:boolean
+}) {
+    const supabase = await createClientServer();
+    const {data, error} = await supabase.from("properties").update({
+        amenities: [wifi,
+      ac,
+      tv,
+      kitchen,
+      workspace,
+      parking,
+      pool,
+      gym,
+      breakfast,
+      roomService,
+      restaurant,
+      bar,
+      spa,
+      laundry]
+    }).eq("id", propertyId).select('id');
+    if(error || !data){
+        throw new Error("error saving info")
+    }
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import PropertyLayout from '@/components/property/property-layout'
+import { saveAmenities } from '@/lib/actions/host'
 
 const amenitiesSchema = z.object({
   wifi: z.boolean().optional(),
@@ -29,13 +30,51 @@ const amenitiesSchema = z.object({
 
 export default function AmenitiesPage() {
   const router = useRouter()
+  const searchParams = useSearchParams();
+  const propertyId = searchParams.get("propertyId");
   const { register, handleSubmit } = useForm({
-    resolver: zodResolver(amenitiesSchema)
+    resolver: zodResolver(amenitiesSchema),
+    defaultValues: {
+      wifi: false,
+      ac: false,
+      tv: false,
+      kitchen: false,
+      workspace: false,
+      parking: false,
+      pool: false,
+      gym: false,
+      breakfast: false,
+      roomService: false,
+      restaurant: false,
+      bar: false,
+      spa: false,
+      laundry: false,
+
+    }
   })
   
-  const onSubmit = (data: any) => {
+  const onSubmit = async(data: any) => {
     console.log(data)
-    router.push('/list-property/services')
+    if(propertyId){
+    await saveAmenities({
+      propertyId: propertyId,
+      wifi: data.wifi,
+      ac: data.ac,
+      tv: data.tv,
+      kitchen: data.kitchen,
+      workspace: data.workspace,
+      parking: data.parking,
+      pool: data.pool,
+      gym: data.gym,
+      breakfast: data.breakfast,
+      roomService: data.roomService,
+      restaurant: data.restaurant,
+      bar: data.bar,
+      spa: data.spa,
+      laundry: data.laundry
+    })
+    router.push(`/list-property/services?propertyId=${propertyId}`);
+    }
   }
 
   return (
