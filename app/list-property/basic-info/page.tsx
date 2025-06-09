@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { MapPin } from 'lucide-react'
 import PropertyLayout from '@/components/property/property-layout'
+import { saveBasicInfo } from '@/lib/actions/host'
 
 const basicInfoSchema = z.object({
   propertyName: z.string().min(2, { message: "Property name must be at least 2 characters" }),
@@ -23,14 +24,23 @@ const basicInfoSchema = z.object({
 })
 
 export default function BasicInfoPage() {
-  const router = useRouter()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const propertyId = searchParams.get('propertyId');
+  console.log(propertyId)
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(basicInfoSchema)
   })
   
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log(data)
-    router.push('/list-property/property-setup')
+    if(propertyId){
+      await saveBasicInfo({propertyId: propertyId, propertyName: data.propertyName, propertyType: data.propertyType, address: data.address, city: data.city, description: data.description, pincode: data.pincode, state: data.state })
+      router.push(`/list-property/property-setup?propertyId=${propertyId}`);
+    }
+    
+   
+
   }
 
   return (

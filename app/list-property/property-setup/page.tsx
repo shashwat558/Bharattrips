@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,12 +10,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import PropertyLayout from '@/components/property/property-layout'
+import { savePropertySetup } from '@/lib/actions/host'
 
 const propertySetupSchema = z.object({
-  bedrooms: z.string().min(1, { message: "Please enter number of bedrooms" }),
-  beds: z.string().min(1, { message: "Please enter number of beds" }),
-  bathrooms: z.string().min(1, { message: "Please enter number of bathrooms" }),
-  maxGuests: z.string().min(1, { message: "Please enter maximum guests" }),
+  bedrooms: z.coerce.number({ message: "Please enter number of bedrooms" }),
+  beds: z.coerce.number({ message: "Please enter number of beds" }),
+  bathrooms: z.coerce.number({ message: "Please enter number of bathrooms" }),
+  maxGuests: z.coerce.number({ message: "Please enter maximum guests" }),
   propertySize: z.string().min(1, { message: "Please enter property size" }),
   allowChildren: z.boolean().optional(),
   allowPets: z.boolean().optional(),
@@ -24,12 +25,31 @@ const propertySetupSchema = z.object({
 })
 
 export default function PropertySetupPage() {
-  const router = useRouter()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const propertyId = searchParams.get("propertyId");
+
   const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(propertySetupSchema)
-  })
+  resolver: zodResolver(propertySetupSchema),
+  defaultValues: {
+    bedrooms: 1,
+    beds: 1,
+    bathrooms: 1,
+    maxGuests: 1,
+    propertySize: "",
+    allowChildren: false,
+    allowPets: false,
+    allowSmoking: false,
+    allowParties: false
+  }
+});
   
-  const onSubmit = (data: any) => {
+  const onSubmit = async(data: any) => {
+    if(propertyId){
+      await savePropertySetup({propertyId: propertyId, bedrooms:data.bedrooms, beds: data.beds, bathrooms: data.bathrooms, maxGuests: data.maxGuests, propertySize: data.propertySize, allowChildren: data.allowChildren, allowPets: data.allowPets, allowParties:data.allowParties, allowSmoking: data.allowSmoking});
+
+      router.push(`/list-property/amenities?propertyId=${propertyId}`);
+    }
     console.log(data)
     console.log("hi")
     
@@ -146,7 +166,7 @@ export default function PropertySetupPage() {
           <Button type="button" variant="outline" onClick={() => router.back()}>
             Back
           </Button>
-          <Button type="submit" onClick={() => router.push("/list-property/amenities")}>
+          <Button type="submit">
             Continue
           </Button>
         </div>

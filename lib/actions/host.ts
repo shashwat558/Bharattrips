@@ -1,5 +1,7 @@
 "use server"
 
+import bcrypt from "bcrypt";
+
 import { createClientServer } from "../utils/supabase/server"
 
 export async function initHostOnborading(email: string){
@@ -17,10 +19,124 @@ export async function initHostOnborading(email: string){
         }).eq("id", user.id)
 
         if(updateError){
-            throw new Error(
-                
-            )
+            throw new Error("failed to update role")
         }
     }
+    const {data, error} = await supabase.from('properties').insert({
+    user_id: user.id,
+    status: 'draft',
+    step_completed: 'basic-info',
+  }).select("id").single();
+  const propertyId = data?.id;
+
+  return {propertyId:propertyId}
+
+}
+
+export async function hostAccountPasswordAndPhone(email: string,password: string, phone: string){
+    const supabase = await createClientServer();
+
+    const {data: user, error:FetchError} = await supabase.from("users").select('id').eq("email", email).maybeSingle();
+
+    if(FetchError || !user) {
+        throw new Error("User not found")
+
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const {error: UpdateError} = await supabase.from("users").update({password: hashedPassword, phone_number: phone}).eq('id', user.id);
+
+    if(UpdateError){
+        throw new Error("failed to save password")
+    }
+
+
+
+}
+
+export async function loginUser(email:string, password: string){
+    const supabase = await createClientServer();
+    const {data: user, error} = await supabase.from("users").select("id, password").eq("email", email).maybeSingle();
+    if(error || !user){
+        return {success: false, error:"User not found"}
+
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if(!isMatch){
+        return {success: false, error: "Incorrect password"}
+    }
+
+    return {success: true, userId: user.id}
+
+}
+
+export async function saveBasicInfo({
+    propertyId,
+    propertyName,
+    propertyType,
+    address,
+    city,
+    state,
+    pincode,
+    description,
+
+}: {
+    propertyId: string,
+    propertyName: string,
+    propertyType: string,
+    address: string,
+    city: string,
+    state: string,
+    pincode: string,
+    description: string
+}) {
+
+    const supabase = await createClientServer();
+    const {data, error} = await supabase.from("properties").update({
+        property_name: propertyName,
+        property_type: propertyType,
+        address: address,
+        city: city,
+        state: state,
+        pincode: pincode,
+        description: description
+    }).eq('id', propertyId).select('id')
+
+    if(error || !data){
+        throw new Error("Failed to save property info");
+    }
+
+    return data[0];
+
+}
+
+
+export async function savePropertySetup({propertyId,bedrooms, beds, bathrooms, maxGuests, propertySize, allowChildren, allowPets, allowSmoking, allowParties}: {propertyId:string,bedrooms: number, beds: number, bathrooms: number, maxGuests: number, propertySize: string, allowChildren: boolean, allowPets:boolean, allowSmoking:boolean, allowParties:boolean}){
+
+    const supabase = await createClientServer();
+    const {data, error} = await supabase.from("properties").update({
+        bedrooms: bedrooms,
+        beds: beds,
+        bathrooms: bathrooms,
+        max_guests: maxGuests,
+        property_size: propertySize,
+        allow_children: allowChildren,
+        allow_parties: allowParties,
+        allow_pets: allowPets,
+        allow_smoking: allowSmoking,
+        step_completed: "property-setup"
+
+    }).eq('id', propertyId);
+
+    if(error || !data){
+        console.log("-------------------------------------------------------", error?.code, error?.cause, error?.details, error?.hint)
+        throw new Error("failed to save property info");
+    }
+
+    return data[0];
+
 
 }

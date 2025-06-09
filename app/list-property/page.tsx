@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Hotel, Mail, Phone, Lock } from 'lucide-react'
+import { hostAccountPasswordAndPhone, initHostOnborading, loginUser } from '@/lib/actions/host'
 
 const emailSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -30,6 +31,8 @@ const passwordSchema = z.object({
 export default function ListPropertyPage() {
   const router = useRouter()
   const [step, setStep] = useState('email') // email, phone, password
+  const [isExistingHost, setIsExistingHost] = useState(false);
+  const [propertyId, setPropertyId] = useState("");
   
   const emailForm = useForm({
     resolver: zodResolver(emailSchema)
@@ -43,19 +46,49 @@ export default function ListPropertyPage() {
     resolver: zodResolver(passwordSchema)
   })
   
-  const onEmailSubmit = (data: any) => {
-    console.log(data)
+  const onEmailSubmit = async(data: any) => {
+
+    const res = await fetch('/api/check-host', {
+      method: "POST",
+      body: JSON.stringify({email: data.email}),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+
+    const result = await res.json();
+    if(result.exists && result.isHost){
+      setIsExistingHost(true);
+      setStep('password')
+    } else {
+    const {propertyId} = await initHostOnborading(data.email);
+    setPropertyId(propertyId);
+
+    setIsExistingHost(false)
     setStep('phone')
   }
+  }
   
-  const onPhoneSubmit = (data: any) => {
+  const onPhoneSubmit = async (data: any) => {
+    
     console.log(data)
     setStep('password')
   }
   
-  const onPasswordSubmit = (data: any) => {
+  const onPasswordSubmit = async (data: any) => {
     console.log(data)
-    router.push('/list-property/basic-info')
+     if (isExistingHost) {
+    
+    const res = await loginUser(emailForm.getValues('email'), data.password)
+    if (!res.success) {
+      
+      return
+    }
+    router.push('/dashboard')
+  } else {
+    await hostAccountPasswordAndPhone(emailForm.getValues("email"), data.password, phoneForm.getValues("phone"));
+    router.push(`/list-property/basic-info?propertyId=${propertyId}`)
+  }
   }
 
   return (
@@ -105,7 +138,9 @@ export default function ListPropertyPage() {
                     />
                   </div>
                   {emailForm.formState.errors.email && (
-                    <p className="text-sm text-destructive">{emailForm.formState.errors.email.message}</p>
+                    <p className="text-sm text-destructive">
+                      {typeof emailForm.formState.errors.email?.message === 'string' && emailForm.formState.errors.email.message}
+                    </p>
                   )}
                 </div>
                 
@@ -118,7 +153,7 @@ export default function ListPropertyPage() {
             <div className="text-center">
               <h1 className="font-playfair text-3xl font-bold mb-2">Add Your Phone</h1>
               <p className="text-muted-foreground mb-8">
-                We'll use this to send you important updates
+                We&apos;ll use this to send you important updates
               </p>
               
               <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-6">
@@ -135,6 +170,7 @@ export default function ListPropertyPage() {
                     />
                   </div>
                   {phoneForm.formState.errors.phone && (
+                    //@ts-ignore
                     <p className="text-sm text-destructive">{phoneForm.formState.errors.phone.message}</p>
                   )}
                 </div>
@@ -168,7 +204,9 @@ export default function ListPropertyPage() {
                     />
                   </div>
                   {passwordForm.formState.errors.password && (
-                    <p className="text-sm text-destructive">{passwordForm.formState.errors.password.message}</p>
+                    <p className="text-sm text-destructive">
+                      {typeof passwordForm.formState.errors.password?.message === 'string' && passwordForm.formState.errors.password.message}
+                    </p>
                   )}
                 </div>
                 
@@ -185,7 +223,9 @@ export default function ListPropertyPage() {
                     />
                   </div>
                   {passwordForm.formState.errors.confirmPassword && (
-                    <p className="text-sm text-destructive">{passwordForm.formState.errors.confirmPassword.message}</p>
+                    <p className="text-sm text-destructive">
+                      {typeof passwordForm.formState.errors.confirmPassword?.message === 'string' && passwordForm.formState.errors.confirmPassword.message}
+                    </p>
                   )}
                 </div>
                 
