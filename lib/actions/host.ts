@@ -159,20 +159,20 @@ export async function saveAmenities({
       laundry,
 }: {
     propertyId: string,
-    wifi: boolean,
-      ac: boolean,
-      tv:boolean,
-      kitchen:boolean,
-      workspace:boolean,
-      parking:boolean,
-      pool:boolean,
-      gym:boolean,
-      breakfast:boolean,
-      roomService:boolean,
-      restaurant:boolean,
-      bar:boolean,
-      spa:boolean,
-      laundry:boolean
+    wifi: string,
+      ac: string,
+      tv:string,
+      kitchen:string,
+      workspace:string,
+      parking:string,
+      pool:string,
+      gym:string,
+      breakfast:string,
+      roomService:string,
+      restaurant:string,
+      bar:string,
+      spa:string,
+      laundry:string
 }) {
     const supabase = await createClientServer();
     const {data, error} = await supabase.from("properties").update({
@@ -194,4 +194,43 @@ export async function saveAmenities({
     if(error || !data){
         throw new Error("error saving info")
     }
+}
+
+
+export async function saveServices({propertyId,languages, checkInTime, checkOutTime, houseRules: {
+    quiteHours,
+    noShoes,
+    noSmoking,
+    noPets
+
+}}: {
+ propertyId: string,   
+ languages: string[],
+ checkInTime: string,
+ checkOutTime: string,
+ houseRules: {
+    quiteHours: string,
+    noShoes: string,
+    noSmoking: string,
+    noPets: string
+ }
+}){
+
+    const supabase = await createClientServer();
+    const {data, error} = await supabase.from("properties").update({
+        languages: languages,
+        check_in_time: checkInTime,
+        check_out_time: checkOutTime,
+        house_rules: {
+            quiteHours,
+            noShoes,
+            noSmoking,
+            noPets
+        }
+    }).eq('id', propertyId).select('id');
+
+    if(error || !data){
+        throw new Error("Error while saving infor")
+    }
+
 }

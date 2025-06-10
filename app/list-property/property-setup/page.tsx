@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import PropertyLayout from '@/components/property/property-layout'
@@ -29,7 +29,7 @@ export default function PropertySetupPage() {
   const searchParams = useSearchParams();
   const propertyId = searchParams.get("propertyId");
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors } , control} = useForm({
   resolver: zodResolver(propertySetupSchema),
   defaultValues: {
     bedrooms: 1,
@@ -140,25 +140,54 @@ export default function PropertySetupPage() {
           <h3 className="text-lg font-medium">Property Rules</h3>
           
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox {...register('allowChildren')} id="allowChildren" />
-              <Label htmlFor="allowChildren">Children allowed</Label>
-            </div>
+            <Controller
+                name="allowChildren"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="allowChildren" checked={field.value} onCheckedChange={field.onChange} />
+                    <Label htmlFor="allowChildren">Children allowed</Label>
+                  </div>
+                )}
+              />
             
-            <div className="flex items-center space-x-2">
-              <Checkbox {...register('allowPets')} id="allowPets" />
-              <Label htmlFor="allowPets">Pets allowed</Label>
-            </div>
+              <Controller
+                name="allowPets"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="allowPets" checked={field.value} onCheckedChange={field.onChange} />
+                    <Label htmlFor="allowPets">Pets allowed</Label>
+                  </div>
+                )}
+              />
+
+              <Controller
+                name="allowSmoking"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="allowSmoking" checked={field.value} onCheckedChange={field.onChange} />
+                    <Label htmlFor="allowSmoking">Smoking Allowed</Label>
+                  </div>
+                )}
+              />
+              <Controller
+                name="allowParties"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="allowParties" checked={field.value} onCheckedChange={field.onChange} />
+                    <Label htmlFor="allowParties">Event/parties allowed</Label>
+                  </div>
+                )}
+              />
             
-            <div className="flex items-center space-x-2">
-              <Checkbox {...register('allowSmoking')} id="allowSmoking" />
-              <Label htmlFor="allowSmoking">Smoking allowed</Label>
-            </div>
             
-            <div className="flex items-center space-x-2">
-              <Checkbox {...register('allowParties')} id="allowParties" />
-              <Label htmlFor="allowParties">Events/parties allowed</Label>
-            </div>
+            
+            
+            
+           
           </div>
         </div>
         
