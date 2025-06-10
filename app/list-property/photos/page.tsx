@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,28 +12,36 @@ import * as z from 'zod'
 import { Upload, X } from 'lucide-react'
 import PropertyLayout from '@/components/property/property-layout'
 
-const photosSchema = z.object({
-  photos: z.array(z.string()).min(5, { message: "Please upload at least 5 photos" }),
-})
+import { createClient } from '@/lib/utils/supabase/client'
+import { savePhotos } from '@/lib/utils'
+
+
 
 export default function PhotosPage() {
+  const searchParams = useSearchParams();
+  const propertyId = searchParams.get("propertyId");
   const router = useRouter()
-  const [photos, setPhotos] = useState<string[]>([])
+  const [photos, setPhotos] = useState<File[]>([])
   const { handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(photosSchema),
-    defaultValues: {
-      photos: []
-    }
+   
   })
   
-  const onSubmit = (data: any) => {
-    console.log(data)
-    router.push('/list-property/pricing')
-  }
+const onSubmit = async () => {
+  if (photos.length < 5 || !propertyId) return;
+
+  const publicUrls = await savePhotos(propertyId, photos);
+
+  const supabase = createClient();
+  await supabase.from('properties').update({
+    photos: publicUrls,
+  }).eq('id', propertyId);
+
+  router.push(`/list-property/pricing?propertyId=${propertyId}`);
+};
   
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newPhotos = Array.from(e.target.files).map(file => URL.createObjectURL(file))
+      const newPhotos = Array.from(e.target.files)
       setPhotos([...photos, ...newPhotos])
     }
   }
@@ -76,22 +84,26 @@ export default function PhotosPage() {
               </Label>
             </div>
             
-            {errors.photos && (
-              <p className="text-sm text-destructive">{errors.photos.message as string}</p>
+            {photos.length < 5 && (
+              <p className="text-sm text-destructive">Please upload at least 5 photos</p>
             )}
+
           </div>
           
           {photos.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Uploaded Photos</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {photos.map((photo, index) => (
+                {photos.map((photo, index) => {
+                  const preview = URL.createObjectURL(photo);
+                  return (
                   <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
                     <Image
-                      src={photo}
+                      src={preview}
                       alt={`Property photo ${index + 1}`}
                       fill
                       className="object-cover"
+                      
                     />
                     <button
                       type="button"
@@ -101,7 +113,7 @@ export default function PhotosPage() {
                       <X className="h-4 w-4" />
                     </button>
                   </div>
-                ))}
+)})}
               </div>
             </div>
           )}

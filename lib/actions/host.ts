@@ -234,3 +234,46 @@ export async function saveServices({propertyId,languages, checkInTime, checkOutT
     }
 
 }
+
+
+
+export async function savePricing({
+  propertyId,
+  basePrice,
+  weekendPrice,
+  cleaningFee,
+  securityDeposit,
+  minimumStay,
+  maximumStay,
+  discounts
+}: {
+  propertyId: string;
+  basePrice: number;
+  weekendPrice: number;
+  cleaningFee: number;
+  securityDeposit: number;
+  minimumStay: number;
+  maximumStay: number;
+  discounts: {
+    monthly: boolean;
+    weekly: boolean;
+    earlyBird: boolean;
+    lastMinute: boolean;
+  };
+}) {
+  const supabase = await createClientServer();
+  
+  const { data, error } = await supabase.from("properties").update({
+    base_price: basePrice,
+    weekend_price: weekendPrice,
+    cleaning_fee: cleaningFee,
+    security_deposit: securityDeposit,
+    min_stay: minimumStay,
+    max_stay: maximumStay,
+    discounts: discounts
+  }).eq('id', propertyId).select('id');
+
+  if (error || !data) {
+    throw new Error("Error saving pricing info");
+  }
+}

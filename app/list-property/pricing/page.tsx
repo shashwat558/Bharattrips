@@ -1,15 +1,16 @@
 "use client"
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import PropertyLayout from '@/components/property/property-layout'
+import { savePricing } from '@/lib/actions/host'
 
 const pricingSchema = z.object({
   basePrice: z.string().min(1, { message: "Please enter base price per night" }),
@@ -27,15 +28,36 @@ const pricingSchema = z.object({
 })
 
 export default function PricingPage() {
+  const searchParams = useSearchParams();
+  const propertyId = searchParams.get("propertyId");
   const router = useRouter()
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors }, control } = useForm({
     resolver: zodResolver(pricingSchema)
   })
   
-  const onSubmit = (data: any) => {
-    console.log(data)
-    router.push('/list-property/legal')
-  }
+  const onSubmit = async (data: any) => {
+  if (!propertyId) return;
+
+  await savePricing({
+    propertyId,
+    basePrice: Number(data.basePrice),
+    weekendPrice: Number(data.weekendPrice),
+    cleaningFee: Number(data.cleaningFee),
+    securityDeposit: Number(data.securityDeposit),
+    minimumStay: Number(data.minStay),
+    maximumStay: Number(data.maxStay),
+    discounts: {
+      weekly: data.discounts?.weekly || false,
+      monthly: data.discounts?.monthly || false,
+      lastMinute: data.discounts?.lastMinute || false,
+      earlyBird: data.discounts?.earlyBird || false
+    }
+  });
+
+  router.push(`/list-property/legal?propertyId=${propertyId}`);
+};
+
+
 
   return (
     <PropertyLayout 
@@ -142,25 +164,51 @@ export default function PricingPage() {
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Discounts</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox {...register('discounts.weekly')} id="weekly" />
-                <Label htmlFor="weekly">Weekly discount (7+ nights)</Label>
-              </div>
+               <Controller
+                name="discounts.weekly"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="weekly" checked={field.value} onCheckedChange={field.onChange} />
+                    <Label htmlFor="weekly">Weekly discount (7+ nights)</Label>
+                  </div>
+                )}
+              />
+              <Controller
+                name="discounts.monthly"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="monthly" checked={field.value} onCheckedChange={field.onChange} />
+                    <Label htmlFor="monthly">Monthly discount (28+ nights)</Label>
+                  </div>
+                )}
+              />
+               <Controller
+                name="discounts.lastMinute"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="lastMinute" checked={field.value} onCheckedChange={field.onChange} />
+                    <Label htmlFor="lastMinute">Last-minute discount</Label>
+                  </div>
+                )}
+              />
               
-              <div className="flex items-center space-x-2">
-                <Checkbox {...register('discounts.monthly')} id="monthly" />
-                <Label htmlFor="monthly">Monthly discount (28+ nights)</Label>
-              </div>
               
-              <div className="flex items-center space-x-2">
-                <Checkbox {...register('discounts.lastMinute')} id="lastMinute" />
-                <Label htmlFor="lastMinute">Last-minute discount</Label>
-              </div>
               
-              <div className="flex items-center space-x-2">
-                <Checkbox {...register('discounts.earlyBird')} id="earlyBird" />
-                <Label htmlFor="earlyBird">Early bird discount</Label>
-              </div>
+               <Controller
+                name="discounts.earlyBird"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="earlyBirds" checked={field.value} onCheckedChange={field.onChange} />
+                    <Label htmlFor="earlyBirds">Early bird discount</Label>
+                  </div>
+                )}
+              />
+              
+              
             </div>
           </div>
         </div>
