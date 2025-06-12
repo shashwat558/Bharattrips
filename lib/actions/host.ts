@@ -277,3 +277,34 @@ export async function savePricing({
     throw new Error("Error saving pricing info");
   }
 }
+
+
+export async function saveLegalInfo({gstRegistered, gstNumber, panNumber, businessName, businessAddress, propertyId}: {
+    gstRegistered: boolean,
+    gstNumber: string,
+    panNumber: string,
+    businessName: string,
+    
+    businessAddress: string,
+    propertyId: string
+
+}){
+
+    const supabase = await createClientServer();
+    const {data, error} = await supabase.from("properties").update({
+        gst_registered: gstRegistered,
+        gst_number: gstNumber,
+        pan_number: panNumber,
+        business_name: businessName,
+        business_address: businessAddress,
+        status: "completed",
+        steps_completed: "legal"
+
+    }).eq("id", propertyId).select('id');
+
+    if(error || !data){
+        console.error("Got an updation error");
+    }
+
+
+}

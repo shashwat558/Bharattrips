@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import PropertyLayout from '@/components/property/property-layout'
+import { saveLegalInfo } from '@/lib/actions/host'
 
 const legalSchema = z.object({
   gstRegistered: z.enum(['yes', 'no']),
@@ -23,17 +24,30 @@ const legalSchema = z.object({
 })
 
 export default function LegalPage() {
-  const router = useRouter()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const propertyId = searchParams.get("propertyId");
   const { register, handleSubmit, watch, formState: { errors } } = useForm({
     resolver: zodResolver(legalSchema)
   })
   
   const isGstRegistered = watch('gstRegistered') === 'yes'
   
-  const onSubmit = (data: any) => {
+  const onSubmit =async (data: any) => {
     console.log(data)
+    if(propertyId){
+    await saveLegalInfo({
+      businessAddress: data.businessAddress,
+      businessName: data.businessName,
+      panNumber: data.panNumber,
+      gstNumber: data.gstNumber,
+      gstRegistered: data.gstRegistered,
+      propertyId: propertyId,
+      
+    })
     router.push('/list-property/success')
   }
+}
 
   return (
     <PropertyLayout 

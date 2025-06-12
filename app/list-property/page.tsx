@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Hotel, Mail, Phone, Lock } from 'lucide-react'
 import { hostAccountPasswordAndPhone, initHostOnborading, loginUser } from '@/lib/actions/host'
+import { createClient } from '@/lib/utils/supabase/client'
+import { useAuth } from '@/stores/useAuth'
 
 const emailSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -33,7 +35,8 @@ export default function ListPropertyPage() {
   const [step, setStep] = useState('email') // email, phone, password
   const [isExistingHost, setIsExistingHost] = useState(false);
   const [propertyId, setPropertyId] = useState("");
-  
+  const {user} = useAuth();
+
   const emailForm = useForm({
     resolver: zodResolver(emailSchema)
   })
@@ -90,6 +93,30 @@ export default function ListPropertyPage() {
     router.push(`/list-property/basic-info?propertyId=${propertyId}`)
   }
   }
+
+  useEffect(() => {
+    const checkPendingEntries = async () => {
+      const supabase = createClient();
+      const {data: draftProperty} = await supabase.from("properties").select("id, step_completed").eq("user_id", user?.id).eq('status', "draft").maybeSingle();
+
+      if(draftProperty){
+        const {id: propertyId, step_completed} = draftProperty;
+        
+        const stepRouteMap: Record<string, string> = {
+          "basic-info": "property-setup",
+          "property-setup": "amenities",
+          "amenities": "services",
+          "services": "photos",
+          "photos": "pricing",
+          "pricing": "legal"
+        }
+
+        const next_step = stepRouteMap[step_completed] || "basic-info";
+
+        router.push(`/list-property/${next_step}?propertyId=${propertyId}`);
+      }
+    }
+  })
 
   return (
     <div className="min-h-screen flex">
@@ -185,7 +212,7 @@ export default function ListPropertyPage() {
           
           {step === 'password' && (
             <div className="text-center">
-              <h1 className="font-playfair text-3xl font-bold mb-2">Create Password</h1>
+              <h1 className="font-playfair text-3xl font-bold mb-2">{isExistingHost ? "Create Password": "Enter password"}</h1>
               <p className="text-muted-foreground mb-8">
                 Choose a secure password for your account
               </p>
@@ -210,7 +237,7 @@ export default function ListPropertyPage() {
                   )}
                 </div>
                 
-                <div className="space-y-2">
+                {!isExistingHost && <div className="space-y-2">
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
@@ -227,9 +254,9 @@ export default function ListPropertyPage() {
                       {typeof passwordForm.formState.errors.confirmPassword?.message === 'string' && passwordForm.formState.errors.confirmPassword.message}
                     </p>
                   )}
-                </div>
+                </div>}
                 
-                <Button type="submit" className="w-full">Create Account</Button>
+                <Button type="submit" className="w-full">{isExistingHost ?"Login": "Create Account"}</Button>
                 <Button type="button" variant="ghost" onClick={() => setStep('phone')} className="w-full">
                   Back
                 </Button>
