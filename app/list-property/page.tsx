@@ -77,21 +77,49 @@ export default function ListPropertyPage() {
     console.log(data)
     setStep('password')
   }
+
+  const redirectToNextPropertyStep = async () => {
+    const supabase = createClient()
+    const { data: draftProperty } = await supabase
+      .from("properties")
+      .select("id, step_completed")
+      .eq("user_id", user?.id)
+      .eq("status", "draft")
+      .maybeSingle()
+
+    if (draftProperty) {
+      const { id: propertyId, step_completed } = draftProperty
+
+      const stepRouteMap: Record<string, string> = {
+        "basic-info": "property-setup",
+        "property-setup": "amenities",
+        "amenities": "services",
+        "services": "photos",
+        "photos": "pricing",
+        "pricing": "legal"
+      }
+
+      const next_step = stepRouteMap[step_completed] || "basic-info"
+      router.push(`/list-property/${next_step}?propertyId=${propertyId}`)
+    } else {
+      
+      router.push("/list-property/basic-info")
+    }
+  }
   
   const onPasswordSubmit = async (data: any) => {
-    console.log(data)
-     if (isExistingHost) {
-    
-    const res = await loginUser(emailForm.getValues('email'), data.password)
-    if (!res.success) {
-      
-      return
+    if (isExistingHost) {
+      const res = await loginUser(emailForm.getValues('email'), data.password)
+      if (!res.success) return
+      await redirectToNextPropertyStep()
+    } else {
+      await hostAccountPasswordAndPhone(
+        emailForm.getValues("email"),
+        data.password,
+        phoneForm.getValues("phone")
+      )
+      router.push(`/list-property/basic-info?propertyId=${propertyId}`)
     }
-    router.push('/dashboard')
-  } else {
-    await hostAccountPasswordAndPhone(emailForm.getValues("email"), data.password, phoneForm.getValues("phone"));
-    router.push(`/list-property/basic-info?propertyId=${propertyId}`)
-  }
   }
 
   useEffect(() => {
@@ -116,7 +144,8 @@ export default function ListPropertyPage() {
         router.push(`/list-property/${next_step}?propertyId=${propertyId}`);
       }
     }
-  })
+    checkPendingEntries();
+  }, [router, user?.id]);
 
   return (
     <div className="min-h-screen flex">

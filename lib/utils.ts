@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export async function savePhotos(propertyId: string, photos: File[]){
-    const supabase = await createClient();
+    const supabase =  createClient();
     const uploadUrls: string[] = [];
 
     for(const photo of photos){

@@ -189,7 +189,8 @@ export async function saveAmenities({
       restaurant,
       bar,
       spa,
-      laundry]
+      laundry],
+      step_completed: "amenities"
     }).eq("id", propertyId).select('id');
     if(error || !data){
         throw new Error("error saving info")
@@ -226,7 +227,8 @@ export async function saveServices({propertyId,languages, checkInTime, checkOutT
             noShoes,
             noSmoking,
             noPets
-        }
+        },
+        step_completed: "services"
     }).eq('id', propertyId).select('id');
 
     if(error || !data){
@@ -270,7 +272,8 @@ export async function savePricing({
     security_deposit: securityDeposit,
     min_stay: minimumStay,
     max_stay: maximumStay,
-    discounts: discounts
+    discounts: discounts,
+    step_completed: "pricing"
   }).eq('id', propertyId).select('id');
 
   if (error || !data) {
