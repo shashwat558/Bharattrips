@@ -1,20 +1,22 @@
 "use client"
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import Link from 'next/link'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Hotel, X } from 'lucide-react'
+import { cancelPropertyUpload } from '@/lib/actions/host'
 
 interface PropertyLayoutProps {
   children: React.ReactNode
   title: string
   description: string
   step: number
-  totalSteps: number
+  totalSteps: number,
+  // propertyId: string
 }
 
-const PropertyLayout = ({ children, title, description, step, totalSteps }: PropertyLayoutProps) => {
+const PropertyLayout = ({ children, title, description, step, totalSteps}: PropertyLayoutProps) => {
   const progress = (step / totalSteps) * 100
 
   return (
@@ -29,7 +31,7 @@ const PropertyLayout = ({ children, title, description, step, totalSteps }: Prop
             </Link>
             
             <Link href="/">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" >
                 <X className="h-5 w-5" />
               </Button>
             </Link>
@@ -55,8 +57,10 @@ const PropertyLayout = ({ children, title, description, step, totalSteps }: Prop
             <h1 className="font-playfair text-3xl font-bold mb-2">{title}</h1>
             <p className="text-muted-foreground">{description}</p>
           </div>
+          <Suspense>
           
           {children}
+          </Suspense>
         </div>
       </main>
     </div>

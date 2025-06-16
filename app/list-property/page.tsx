@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Hotel, Mail, Phone, Lock } from 'lucide-react'
-import { hostAccountPasswordAndPhone, initHostOnborading, loginUser } from '@/lib/actions/host'
+import { checkHostByEmail, hostAccountPasswordAndPhone, initHostOnborading, loginUser } from '@/lib/actions/host'
 import { createClient } from '@/lib/utils/supabase/client'
 import { useAuth } from '@/stores/useAuth'
 
@@ -49,29 +49,23 @@ export default function ListPropertyPage() {
     resolver: zodResolver(passwordSchema)
   })
   
-  const onEmailSubmit = async(data: any) => {
+  const onEmailSubmit = async (data: any) => {
+  const { email } = data;
+  if (!email) return;
 
-    const res = await fetch('/api/check-host', {
-      method: "POST",
-      body: JSON.stringify({email: data.email}),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
+  const result = await checkHostByEmail(email);
 
-    const result = await res.json();
-    if(result.exists && result.isHost){
-      setIsExistingHost(true);
-      setStep('password')
-    } else {
-    const {propertyId} = await initHostOnborading(data.email);
+  if (result.exists && result.isHost) {
+    setIsExistingHost(true);
+    setStep('password');
+  } else {
+    const { propertyId } = await initHostOnborading(email);
     setPropertyId(propertyId);
 
-    setIsExistingHost(false)
-    setStep('phone')
+    setIsExistingHost(false);
+    setStep('phone');
   }
-  }
-  
+};
   const onPhoneSubmit = async (data: any) => {
     
     console.log(data)
@@ -98,12 +92,21 @@ export default function ListPropertyPage() {
         "photos": "pricing",
         "pricing": "legal"
       }
-
+      setPropertyId(propertyId)
       const next_step = stepRouteMap[step_completed] || "basic-info"
       router.push(`/list-property/${next_step}?propertyId=${propertyId}`)
     } else {
-      
-      router.push("/list-property/basic-info")
+      const {data, error} = await supabase.from("properties").insert({
+        user_id: user?.id,
+        status: 'draft',
+        step_completed: 'basic-info',
+      }).select('id').single();
+
+      if(error || !data){
+        throw new Error("Error creating property");
+      } 
+      setPropertyId(data.id)
+      router.push(`/list-property/basic-info?propertyId=${data.id}`);
     }
   }
   
@@ -241,7 +244,7 @@ export default function ListPropertyPage() {
           
           {step === 'password' && (
             <div className="text-center">
-              <h1 className="font-playfair text-3xl font-bold mb-2">{isExistingHost ? "Create Password": "Enter password"}</h1>
+              <h1 className="font-playfair text-3xl font-bold mb-2">{isExistingHost ? "Enter Password": "Create password"}</h1>
               <p className="text-muted-foreground mb-8">
                 Choose a secure password for your account
               </p>

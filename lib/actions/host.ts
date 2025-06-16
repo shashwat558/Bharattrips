@@ -73,6 +73,27 @@ export async function loginUser(email:string, password: string){
 
 }
 
+export async function checkHostByEmail(email: string) {
+  if (!email) return { exists: false, isHost: false };
+
+  const supabase = await createClientServer();
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, role")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (error || !data) {
+    return { exists: false, isHost: false };
+  }
+
+  return {
+    exists: true,
+    isHost: data.role === "host"
+  };
+}
+
 export async function saveBasicInfo({
     propertyId,
     propertyName,
@@ -301,13 +322,26 @@ export async function saveLegalInfo({gstRegistered, gstNumber, panNumber, busine
         business_name: businessName,
         business_address: businessAddress,
         status: "completed",
-        steps_completed: "legal"
+        step_completed: "legal"
 
     }).eq("id", propertyId).select('id');
 
     if(error || !data){
-        console.error("Got an updation error");
+        console.error("Got an updation error", error.message);
     }
 
+
+}
+
+export async function cancelPropertyUpload(propertyId: string) {
+
+    const supabase = await createClientServer();
+    console.log("______________________________________________#########################")
+    const {error: deleteError} = await supabase.from('properties').delete().eq('id', propertyId).select('id');
+
+    if(deleteError){
+        console.log(deleteError.message)
+        console.error("Error cancelling");
+    }
 
 }

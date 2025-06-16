@@ -27,8 +27,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const {user, setUser} = useAuth();
-  const location = window.location
-  const locationarray = location.href.split('/');
+  const [shouldHideHeader, setShouldHideHeader] = useState(false);
   
 
   
@@ -46,7 +45,16 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  if(locationarray.includes("list-property")) return null;
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const locationArray = window.location.href.split('/');
+      if (locationArray.includes("list-property")) {
+        setShouldHideHeader(true);
+      }
+    }
+  }, [])
+
+  if (shouldHideHeader) return null;
 
   return (
     <header className={cn(
