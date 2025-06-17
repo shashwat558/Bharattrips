@@ -20,7 +20,7 @@ const emailSchema = z.object({
 
 const phoneSchema = z.object({
   phone: z.string().min(10, { message: "Please enter a valid phone number" }),
-})
+}).optional()
 
 const passwordSchema = z.object({
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
@@ -29,6 +29,8 @@ const passwordSchema = z.object({
   message: "Passwords don't match",
   path: ["confirmPassword"]
 })
+
+
 
 export default function ListPropertyPage() {
   const router = useRouter()
@@ -44,10 +46,14 @@ export default function ListPropertyPage() {
   const phoneForm = useForm({
     resolver: zodResolver(phoneSchema)
   })
+
+  const loginSchema = z.object({
+  password: z.string().min(8)
+})
   
   const passwordForm = useForm({
-    resolver: zodResolver(passwordSchema)
-  })
+  resolver: zodResolver(isExistingHost ? loginSchema : passwordSchema)
+})
   
   const onEmailSubmit = async (data: any) => {
   const { email } = data;
@@ -111,6 +117,7 @@ export default function ListPropertyPage() {
   }
   
   const onPasswordSubmit = async (data: any) => {
+    console.log(data, "this is data")
     if (isExistingHost) {
       const res = await loginUser(emailForm.getValues('email'), data.password)
       if (!res.success) return

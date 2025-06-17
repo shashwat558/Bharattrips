@@ -345,3 +345,15 @@ export async function cancelPropertyUpload(propertyId: string) {
     }
 
 }
+
+export async function fetchHotel({propertyId}: {propertyId:string}) {
+    const supabase = await createClientServer();
+    const {data, error} = await supabase.from("properties").select("*").eq('id', propertyId).maybeSingle();
+
+    if(error || !data) {
+      throw new Error("Error fetching hotel")
+    }
+
+    return data;
+
+}

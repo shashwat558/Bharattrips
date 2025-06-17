@@ -30,6 +30,7 @@ import RoomList from '@/components/hotels/room-list'
 import ReviewsList from '@/components/hotels/reviews-list'
 import ReservationBox from '@/components/hotels/reservation-box'
 import SimilarHotels from '@/components/hotels/similar-hotels'
+import { fetchHotel } from '@/lib/actions/host'
 
 // This would come from an API in a real app
 
@@ -165,6 +166,8 @@ const getAmenityIcon = (icon: string) => {
 export default async function HotelDetailPage({params}: {params: Promise<{id: string}>}) {
   const {id} = await params;
    const hotel = getHotelById(id);
+   const hotelDetails = await fetchHotel({propertyId:"0b2cacc8-6a76-4836-ad0b-5f5bbb2239a8"});
+   console.log(hotelDetails);
 
   if (!hotel) return <div>Hotel not found</div>; // In a real app, we would fetch the hotel by ID
   
