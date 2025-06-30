@@ -41,7 +41,7 @@ import { fetchHotel, getPropertyReviews } from '@/lib/actions/host'
 // const getPropertyData = (id: string) => {
 //   // Sample data matching your structure
 //   return {
-//     id: "0b2cacc8-6a76-4836-ad0b-5f5bbb2239a8",
+//     id: id,
 //     property_name: "White House Luxury Apartment",
 //     property_type: "apartment",
 //     address: "Near Paan Shop, Gandhi Maidan Area",
@@ -143,9 +143,10 @@ const formatAddress = (property: any) => {
   return `${property.address}, ${property.city}, ${property.state} ${property.pincode}`
 }
 
-export default async function HotelDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const property = await fetchHotel({propertyId: "0b2cacc8-6a76-4836-ad0b-5f5bbb2239a8"})
+export default async function HotelDetailPage({ params }: { params: Promise<{   id: string }> }) {
+  const { id } = await params;
+  
+  const property = await fetchHotel({propertyId: id})
 
    
   
@@ -190,7 +191,7 @@ export default async function HotelDetailPage({ params }: { params: Promise<{ id
                     Weekend: ₹{property.weekend_price.toLocaleString()}
                   </div>
                 </div>
-                <Link href={`/booking/${property.id}`}>
+                <Link href={`/booking/${id}`}>
                   <Button size="lg" className="mt-2">
                     Book Now
                   </Button>
@@ -383,7 +384,7 @@ export default async function HotelDetailPage({ params }: { params: Promise<{ id
               
               {/* Reviews Tab */}
               <TabsContent value="reviews">
-                <ReviewsList hotelId={"0b2cacc8-6a76-4836-ad0b-5f5bbb2239a8"} rating={property.rating} reviewCount={property.reviews} />
+                <ReviewsList hotelId={id} rating={property.rating} reviewCount={property.reviews} />
               </TabsContent>
             </Tabs>
           </div>

@@ -35,3 +35,15 @@ export async function savePhotos(propertyId: string, photos: File[]){
     return uploadUrls;
 
 }
+
+export function transformFeaturedProperty(raw: any) {
+  return {
+    id: raw.id,
+    name: raw.property_name,
+    location: `${raw.city}, ${raw.state}`,
+    price: raw.base_price,
+    image: raw.photos?.[0] ?? "/fallback.jpg",
+    tags: ["Popular", raw.property_type],
+    amenities: raw.amenities.slice(0, 5) ?? [],
+  };
+}

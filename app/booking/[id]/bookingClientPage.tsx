@@ -63,6 +63,7 @@ const hotelData = {
 const BookingClientPage = ({id}: {id: number}) => {
   const router = useRouter()
   const searchParams = useSearchParams()
+  console.log(id)
   
   // Parse dates from URL
   const parseDate = (dateStr: string | null) => {

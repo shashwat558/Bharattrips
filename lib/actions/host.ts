@@ -3,6 +3,7 @@
 import bcrypt from "bcrypt";
 
 import { createClientServer } from "../utils/supabase/server"
+import { transformFeaturedProperty } from "../utils";
 
 export async function initHostOnborading(email: string){
     const supabase = await createClientServer();
@@ -411,3 +412,22 @@ export async function getPropertyReviews(propertyId: string) {
             })
         }
     }
+
+
+    export async function getFeaturesProperties() {
+        const supabase = await createClientServer();
+
+        const {data: Properties, error} = await supabase.from("properties").select("*").eq("is_featured", true).limit(6);
+
+        if(error || !Properties) {
+            throw new Error(error.message)
+        }
+
+        
+        const featuredProperties = Properties.map(transformFeaturedProperty);
+
+        return featuredProperties
+
+    }
+
+

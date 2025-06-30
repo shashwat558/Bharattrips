@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MapPin, Star, Coffee, Wifi, UtensilsCrossed, Tv } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getFeaturesProperties } from '@/lib/actions/host'
 
 // This would typically come from an API
 const featuredProperties = [
@@ -46,6 +47,19 @@ const featuredProperties = [
   }
 ];
 
+interface propertiesType {
+  id: string,
+  name: string,
+  location: string,
+  amenities: string[],
+  image: string,
+  price: number,
+  tags: string[]
+
+}
+
+
+
 const FeaturedProperties = () => {
   const getAmenityIcon = (amenity: string) => {
     switch(amenity) {
@@ -63,6 +77,16 @@ const FeaturedProperties = () => {
         return null;
     }
   };
+  const [featuredProperties, setFeaturedProperties] = useState<propertiesType[]>([]);
+
+  useEffect(() => {
+    const getProperties = async () => {
+      const properties = await getFeaturesProperties();
+      console.log(properties);
+      setFeaturedProperties(properties)
+    }
+    getProperties()
+  },[])
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -92,11 +116,7 @@ const FeaturedProperties = () => {
           <CardContent className="p-6">
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-playfair text-xl font-bold">{property.name}</h3>
-              <div className="flex items-center">
-                <Star className="h-4 w-4 text-accent fill-accent mr-1" />
-                <span className="font-medium">{property.rating}</span>
-                <span className="text-muted-foreground text-sm ml-1">({property.reviews})</span>
-              </div>
+              
             </div>
             
             <div className="flex items-center text-muted-foreground mb-4">
