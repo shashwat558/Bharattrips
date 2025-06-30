@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { 
@@ -35,7 +35,7 @@ import RoomList from '@/components/hotels/room-list'
 import ReviewsList from '@/components/hotels/reviews-list'
 import ReservationBox from '@/components/hotels/reservation-box'
 import SimilarHotels from '@/components/hotels/similar-hotels'
-import { fetchHotel } from '@/lib/actions/host'
+import { fetchHotel, getPropertyReviews } from '@/lib/actions/host'
 
 // This would come from an API in a real app based on the data structure you provided
 // const getPropertyData = (id: string) => {
@@ -146,6 +146,8 @@ const formatAddress = (property: any) => {
 export default async function HotelDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const property = await fetchHotel({propertyId: "0b2cacc8-6a76-4836-ad0b-5f5bbb2239a8"})
+
+   
   
   return (
     <>
@@ -381,7 +383,7 @@ export default async function HotelDetailPage({ params }: { params: Promise<{ id
               
               {/* Reviews Tab */}
               <TabsContent value="reviews">
-                <ReviewsList hotelId={property.id} rating={property.rating} reviewCount={property.reviews} />
+                <ReviewsList hotelId={"0b2cacc8-6a76-4836-ad0b-5f5bbb2239a8"} rating={property.rating} reviewCount={property.reviews} />
               </TabsContent>
             </Tabs>
           </div>

@@ -1,16 +1,34 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Star, ThumbsUp, MessageCircle } from 'lucide-react'
+import { Star, ThumbsUp, MessageCircle, User2Icon, ThumbsDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { addReview, getPropertyReviews, likeReview } from '@/lib/actions/host'
+import { useAuth } from '@/stores/useAuth'
 
 interface ReviewsListProps {
-  hotelId: number
+  hotelId: string
   rating: number
   reviewCount: number
+}
+
+interface Reviews {
+  id: string,
+  user_id: string,
+  property_id: string,
+  comment: string,
+  review_title: string,
+  rating: number,
+  created_at: Date,
+  
+  name: string,
+  email: string,
+  likes: number,
+  dislikes: number
+  
 }
 
 // This would typically come from an API
@@ -72,7 +90,14 @@ const reviews = [
     replies: 3
   }
 ];
-
+// interface reviewsType {
+//   id: string,
+//   user: {
+//     name: string,
+//     loction: string,
+//     images
+//   }
+// }
 // Calculate rating distribution
 const ratingDistribution = [
   { stars: 5, percentage: 65 },
@@ -88,6 +113,21 @@ const ReviewsList = ({ hotelId, rating, reviewCount }: ReviewsListProps) => {
   const [newRating, setNewRating] = useState(0);
   const [newComment, setNewComment] = useState("");
   const [newTitle, setNewTitle] = useState("");
+  const [reviews, setReviews] = useState<Reviews[] | []>([]);
+  const {user} = useAuth();
+  // const [reviews, setReviews] = useState([]);
+
+ useEffect(() => {
+    const getReviews = async () => {
+      const reviews = await getPropertyReviews(hotelId);
+      console.log(reviews);
+      setReviews(reviews)
+      
+
+      
+    }
+    getReviews()
+  },[hotelId])
 
   
   return (
@@ -132,11 +172,25 @@ const ReviewsList = ({ hotelId, rating, reviewCount }: ReviewsListProps) => {
 
           {showReviewForm && (
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              // Handle submission here (send to API or add to state)
+              const newReview = await addReview({comment: newComment, propertyId: hotelId, rating: newRating, reviewTitle: newTitle})
               console.log({ newRating, newTitle, newComment });
-              // Reset form and hide
+
+              if (
+                newReview &&
+                typeof newReview === "object" &&
+                "id" in newReview &&
+                "user_id" in newReview &&
+                "property_id" in newReview
+              ) {
+                setReviews((prev) => [...prev, newReview]);
+              }
+              
+              
+
+              
+              
               setShowReviewForm(false);
               setNewRating(0);
               setNewTitle("");
@@ -211,20 +265,15 @@ const ReviewsList = ({ hotelId, rating, reviewCount }: ReviewsListProps) => {
               <div key={review.id} className="border-b pb-6 last:border-none">
                 <div className="flex items-start gap-4">
                   <div className="relative w-12 h-12 rounded-full overflow-hidden">
-                    <Image
-                      src={review.user.image}
-                      alt={review.user.name}
-                      fill
-                      className="object-cover"
-                    />
+                    <User2Icon className='w-5 h-5'/>
                   </div>
                   
                   <div className="flex-1">
                     <div className="flex flex-wrap justify-between items-start mb-2">
                       <div>
-                        <h4 className="font-medium">{review.user.name}</h4>
+                        <h4 className="font-medium">{review.name}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {review.user.location} • {review.date}
+                          {new Date(review.created_at).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="flex">
@@ -240,18 +289,44 @@ const ReviewsList = ({ hotelId, rating, reviewCount }: ReviewsListProps) => {
                       </div>
                     </div>
                     
-                    <h5 className="font-medium mb-2">{review.title}</h5>
+                    <h5 className="font-medium mb-2">{review.review_title}</h5>
                     <p className="text-muted-foreground mb-4">{review.comment}</p>
                     
                     <div className="flex gap-4">
-                      <Button variant="ghost" size="sm" className="h-8 gap-1">
-                        <ThumbsUp className="h-4 w-4" />
-                        <span>{review.likes}</span>
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-8 gap-1">
-                        <MessageCircle className="h-4 w-4" />
-                        <span>{review.replies}</span>
-                      </Button>
+                        <Button
+                          onClick={async () => {
+                            await likeReview({ propertyId: hotelId, reviewId: review.id, voteType: "like" });
+
+                            setReviews((prev) =>
+                              prev.map((r) =>
+                                r.id === review.id
+                                  ? { ...r, likes: (r.likes || 0) + 1 } 
+                                  : r
+                              )
+                            );
+                          }}
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 gap-1"
+                        >
+                          <ThumbsUp className="h-4 w-4" />
+                          <span>{review.likes > 0 ? review.likes : ""}</span>
+                        </Button>
+                        <Button onClick={async () => {
+                          await likeReview({propertyId: hotelId, reviewId: review.id, voteType: "dislike"}) 
+                          setReviews((prev) =>
+                              prev.map((r) =>
+                                r.id === review.id
+                                  ? { ...r, likes: (r.likes || 0) + 1 } 
+                                  : r
+                              )
+                            );
+                          }
+                          } variant="ghost" size="sm" className="h-8 gap-1">
+                          <ThumbsDown className="h-4 w-4" />
+                          <span>{review.dislikes === 0 ? "" : review.dislikes}</span>
+                        </Button>
+                      
                     </div>
                   </div>
                 </div>

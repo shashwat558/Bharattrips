@@ -359,3 +359,55 @@ export async function fetchHotel({propertyId}: {propertyId:string}) {
 }
 
 
+export async function addReview({propertyId, rating, comment, reviewTitle}: {propertyId: string, rating: number, comment: string, reviewTitle: string}) {
+    const supabase = await createClientServer();
+    const user = await supabase.auth.getUser();
+        const {data: newReview,error} = await supabase.from("property_reviews").insert({
+            user_id: user.data.user?.id,
+            property_id: propertyId,
+            rating: rating,
+            comment: comment,
+            review_title: reviewTitle
+        }).select(`*, users (email, name), `).maybeSingle();
+
+    if(error || !newReview){
+        throw new Error(error?.message)
+    }
+
+    return newReview;
+}
+
+export async function getPropertyReviews(propertyId: string) {
+    const supabase = await createClientServer();
+    const {data, error} = await supabase.from("property_reviews_with_votes").select(`*`).eq("property_id", propertyId).order("created_at", {ascending: false});
+    if(error || !data){
+        throw new Error(error.message);
+
+    }
+
+    return data;
+}
+
+
+    export async function likeReview({reviewId,propertyId,  voteType}: {reviewId: string,propertyId: string, voteType: "like" | "dislike"}) {
+        const supabase = await createClientServer();
+        const {data} = await supabase.auth.getUser();
+        
+        const {data: isExisting, error} = await supabase.from("review_votes").select("*").eq("user_id", data.user?.id).eq("review_id", reviewId).single();
+        
+        if(isExisting){
+            if(isExisting.voted_type === voteType){
+                await supabase.from("review_votes").delete().eq("id", isExisting.id)
+
+            }else {
+                await supabase.from("review_votes").update({voted_type: voteType}).eq('id', isExisting.id);
+            }
+
+        } else {
+            await supabase.from("review_votes").insert({
+                review_id: reviewId,
+                user_id: data.user?.id,
+                voted_type: voteType
+            })
+        }
+    }

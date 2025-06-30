@@ -51,7 +51,7 @@ const bookingFormSchema = z.object({
   }),
 })
 
-// This would come from an API in a real app
+
 const hotelData = {
   id: 1,
   name: "Grand Plaza Hotel & Spa",
