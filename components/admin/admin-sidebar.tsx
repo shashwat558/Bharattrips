@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -39,11 +39,12 @@ const sidebarItems: SidebarItem[] = [
 
 const AdminSidebar = () => {
   const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(true);
   
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-card border-r z-30">
+      <div className={`hidden md:flex ${isOpen ? 'md:w-64': "md:w-10"} md:flex-col md:fixed md:inset-y-0 bg-card border-r z-30`}>
         <div className="flex flex-col flex-grow pt-5 overflow-y-auto">
           <div className="flex items-center px-6 h-16">
             <Link href="/admin" className="flex items-center">

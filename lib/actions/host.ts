@@ -357,3 +357,5 @@ export async function fetchHotel({propertyId}: {propertyId:string}) {
     return data;
 
 }
+
+

@@ -83,7 +83,12 @@ const ratingDistribution = [
 ];
 
 const ReviewsList = ({ hotelId, rating, reviewCount }: ReviewsListProps) => {
-  const [sortBy, setSortBy] = useState("recent")
+  const [sortBy, setSortBy] = useState("recent");
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+
   
   return (
     <div className="space-y-8">
@@ -121,9 +126,71 @@ const ReviewsList = ({ hotelId, rating, reviewCount }: ReviewsListProps) => {
             ))}
           </div>
           
-          <Button className="w-full mt-6">Write a Review</Button>
+          <Button className="w-full mt-6" onClick={() => setShowReviewForm((prev) => !prev)}>
+            {showReviewForm ? "Cancel" : "Write a Review"}
+          </Button>
+
+          {showReviewForm && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              // Handle submission here (send to API or add to state)
+              console.log({ newRating, newTitle, newComment });
+              // Reset form and hide
+              setShowReviewForm(false);
+              setNewRating(0);
+              setNewTitle("");
+              setNewComment("");
+            }}
+            className="mt-6 space-y-4"
+          >
+            <div>
+              <label className="block mb-1 font-medium">Your Rating</label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    onClick={() => setNewRating(star)}
+                    className={cn(
+                      "h-6 w-6 cursor-pointer",
+                      newRating >= star ? "text-accent fill-accent" : "text-muted"
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block mb-1 font-medium">Title</label>
+              <input
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                className="w-full p-2 border rounded-md"
+                placeholder="Great stay!"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 font-medium">Your Review</label>
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                rows={4}
+                className="w-full p-2 border rounded-md"
+                placeholder="Share your experience..."
+              />
+            </div>
+
+            <Button type="submit" className="w-full">
+              Submit Review
+            </Button>
+          </form>
+)}
+
         </div>
         
+        
+
         {/* Reviews List */}
         <div className="w-full md:w-2/3">
           <div className="flex justify-between items-center mb-6">
