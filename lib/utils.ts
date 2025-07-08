@@ -66,7 +66,7 @@ export async function sendBookingEmail({
   bookingId: string;
   checkInDate: Date;
   checkOutDate: Date;
-  rooms: string;
+  rooms: number;
   guests: number;
 }) {
   try {

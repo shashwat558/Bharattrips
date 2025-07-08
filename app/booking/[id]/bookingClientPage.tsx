@@ -117,21 +117,24 @@ const BookingClientPage = ({id, hotelDetails}: {id: string, hotelDetails: hotels
   const paymentMethod = form.watch("paymentMethod")
   
   const onSubmit = async (values: z.infer<typeof bookingFormSchema>) => {
-    
-    const bookingId = await confirmHotelBooking({
-      propertyId: id,
-      checkInDate: checkIn,
-      checkOutDate: checkOut,
-      cleaningFee: hotelDetails.cleaning_fee,
-      emailAddress: 
+  const bookingId = await confirmHotelBooking({
+    propertyId: id,
+    checkInDate: checkIn,
+    checkOutDate: checkOut,
+    cleaningFee: hotelDetails.cleaning_fee,
+    emailAddress: values.email,
+    firstName: values.firstName,
+    lastName: values.lastName,
+    guests: parseInt(guests),
+    phoneNumber: values.phone,
+    rooms: parseInt(roomCount),
+    specialRequirements: values.specialRequests ?? "",
+    totalPrice: total,
+    paymentMethod: values.paymentMethod as "credit_card" | "paypal"
+  });
 
-    })
-    
-    
-    
-    router.push(`/booking/confirmation?id=${id}`)
-  }
-
+  router.push(`/booking/confirmation?id=${bookingId}`);
+}
   return (
     <div className="container mx-auto px-4 py-12 pt-28">
       <Link 

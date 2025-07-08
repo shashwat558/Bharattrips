@@ -447,51 +447,89 @@ export async function getBookingDetails({propertyId}: {propertyId: string}){
 }
 
 
-export async function confirmHotelBooking({propertyId, checkInDate, checkOutDate, guests, totalPrice, cleaningFee, firstName, lastName, emailAddress, phoneNumber, specialRequirements}: {
-    propertyId: string,
-    checkInDate: Date,
-    checkOutDate: Date,
-    guests: number,
-    totalPrice: number,
-    cleaningFee: number,
-    firstName: string,
-    lastName: string,
-    emailAddress: string,
-    phoneNumber: string,
-    specialRequirements: string
+export async function confirmHotelBooking({
+  propertyId,
+  checkInDate,
+  checkOutDate,
+  guests,
+  totalPrice,
+  cleaningFee,
+  firstName,
+  lastName,
+  emailAddress,
+  phoneNumber,
+  specialRequirements,
+  rooms,
+  paymentMethod
+}: {
+  propertyId: string,
+  checkInDate: Date,
+  checkOutDate: Date,
+  guests: number,
+  totalPrice: number,
+  cleaningFee: number,
+  firstName: string,
+  lastName: string,
+  emailAddress: string,
+  phoneNumber: string,
+  specialRequirements: string,
+  rooms: number,
+  paymentMethod: "credit_card" | "paypal"
 }) {
+  const supabase = await createClientServer();
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id ?? null;
 
-    const supabase = await createClientServer();
-    const data = await supabase.auth.getUser();
-    const userId = data.data.user?.id;
-    const {data: bookingData, error} = await supabase.from("bookings").insert({
-
-        user_id: userId,
-        property_id: propertyId,
-        check_in: checkInDate,
-        check_out: checkOutDate,
-        guests: guests,
-        total_price: totalPrice,
-        cleaning_fee: cleaningFee,
-        status: "confirmed",
-        first_name: firstName,
-        last_name: lastName,
-        email_address: emailAddress,
-        phone_number: phoneNumber,
-        special_requirements: specialRequirements
-    }).select('id').single();
-
-    if(!bookingData || error){
-        throw new Error(error.message);
-    }
-    await sendBookingEmail({
-        to: emailAddress,
-        bookingId: bookingData.id,
-        checkInDate: checkInDate,
-        checkOutDate: checkOutDate,
-        guests: guests,
-        name: firstName + lastName,
-
+  const { data: bookingData, error } = await supabase
+    .from("bookings")
+    .insert({
+      user_id: userId,
+      property_id: propertyId,
+      check_in: checkInDate,
+      check_out: checkOutDate,
+      guests: guests,
+      total_price: totalPrice,
+      cleaning_fee: cleaningFee,
+      status: "confirmed",
+      first_name: firstName,
+      last_name: lastName,
+      email_address: emailAddress,
+      phone_number: phoneNumber,
+      special_requirements: specialRequirements,
+      number_of_rooms: rooms
     })
+    .select("id")
+    .single();
 
+  if (!bookingData || error) {
+    throw new Error(error.message);
+  }
+
+  
+  const { error: paymentError } = await supabase
+    .from("payments")
+    .insert({
+      booking_id: bookingData.id,
+      user_id: userId,
+      amount: totalPrice,
+      method: paymentMethod,
+      status: "succeeded",
+    });
+
+  if (paymentError) {
+    throw new Error(paymentError.message);
+  }
+
+  
+  await sendBookingEmail({
+    to: emailAddress,
+    bookingId: bookingData.id,
+    checkInDate: checkInDate,
+    checkOutDate: checkOutDate,
+    guests: guests,
+    name: `${firstName} ${lastName}`,
+    rooms: rooms
+  });
+
+  return bookingData.id;
 }
