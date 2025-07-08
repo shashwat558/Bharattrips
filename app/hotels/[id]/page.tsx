@@ -183,7 +183,7 @@ export default async function HotelDetailPage({ params }: { params: Promise<{   
                 </div>
               </div>
               
-              <div className="mt-4 lg:mt-0">
+              <div className="mt-10 lg:mt-0">
                 <div className="text-right">
                   <span className="text-2xl font-bold">₹{property.base_price.toLocaleString()}</span>
                   <span className="text-muted-foreground"> / night</span>
@@ -191,11 +191,7 @@ export default async function HotelDetailPage({ params }: { params: Promise<{   
                     Weekend: ₹{property.weekend_price.toLocaleString()}
                   </div>
                 </div>
-                <Link href={`/booking/${id}`}>
-                  <Button size="lg" className="mt-2">
-                    Book Now
-                  </Button>
-                </Link>
+                
               </div>
             </div>
             
@@ -392,8 +388,8 @@ export default async function HotelDetailPage({ params }: { params: Promise<{   
           {/* Sidebar */}
           <div className="w-full lg:w-1/3">
             <ReservationBox hotel={{
-              id: parseInt(property.id.split('-')[0], 16), // Convert UUID to number for compatibility
-              price: property.base_price
+              id: id, 
+              price: property.base_price  
             }} />
             
             <div className="mt-8 space-y-6">

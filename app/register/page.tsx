@@ -36,7 +36,7 @@ export default function RegisterPage() {
   })
 
     const onSubmit = async (data: z.infer<typeof registerSchema>) => {
-    await signup({ email: data.email, password: data.password })
+    await signup({ email: data.email, password: data.password, name: data.name })
     
       router.push('/check-email');
     

@@ -30,7 +30,7 @@ import { Calendar as CalendarIcon, Users, ChevronRight } from 'lucide-react'
 
 interface ReservationBoxProps {
   hotel: {
-    id: number
+    id: string
     price: number
   }
 }

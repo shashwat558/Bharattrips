@@ -51,7 +51,8 @@ export async function login(data: SignupInput) {
 
 type SignupInput = {
   email: string
-  password: string
+  password: string,
+  name: string
 }
 
 export async function signup(signUpData: SignupInput) {
@@ -72,6 +73,7 @@ export async function signup(signUpData: SignupInput) {
   const { data, error } = await supabase.auth.signUp({
     email: signUpData.email,
     password: signUpData.password,
+    
   })
 
   if (error) {
@@ -84,6 +86,7 @@ export async function signup(signUpData: SignupInput) {
     await supabase.from('users').insert({
       id: data.user.id,
       email: data.user.email,
+      name: signUpData.name
     })
   }
 

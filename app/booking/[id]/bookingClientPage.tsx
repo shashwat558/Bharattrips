@@ -32,6 +32,7 @@ import { MapPin, Calendar, Users, ArrowLeft} from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import { confirmHotelBooking } from '@/lib/actions/host'
 
 // Form validation schema
 const bookingFormSchema = z.object({
@@ -60,7 +61,16 @@ const hotelData = {
   image: "https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg",
 };
 
-const BookingClientPage = ({id}: {id: number}) => {
+interface hotelsDataType {
+  property_name: string,
+  base_price: number,
+  city: string,
+  state: string,
+  photos: string[],
+  cleaning_fee: number
+};
+
+const BookingClientPage = ({id, hotelDetails}: {id: string, hotelDetails: hotelsDataType}) => {
   const router = useRouter()
   const searchParams = useSearchParams()
   console.log(id)
@@ -84,7 +94,7 @@ const BookingClientPage = ({id}: {id: number}) => {
     (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
   )
   
-  const subtotal = hotelData.price * nightsCount * parseInt(roomCount)
+  const subtotal = hotelDetails.base_price * nightsCount * parseInt(roomCount)
   const taxes = Math.round(subtotal * 0.1)
   const serviceFee = 45
   const total = subtotal + taxes + serviceFee
@@ -106,11 +116,19 @@ const BookingClientPage = ({id}: {id: number}) => {
   
   const paymentMethod = form.watch("paymentMethod")
   
-  const onSubmit = (values: z.infer<typeof bookingFormSchema>) => {
-    // In a real app, this would submit the booking to an API
-    console.log(values)
+  const onSubmit = async (values: z.infer<typeof bookingFormSchema>) => {
     
-    // Redirect to confirmation page
+    const bookingId = await confirmHotelBooking({
+      propertyId: id,
+      checkInDate: checkIn,
+      checkOutDate: checkOut,
+      cleaningFee: hotelDetails.cleaning_fee,
+      emailAddress: 
+
+    })
+    
+    
+    
     router.push(`/booking/confirmation?id=${id}`)
   }
 
@@ -407,17 +425,17 @@ const BookingClientPage = ({id}: {id: number}) => {
               <div className="flex gap-4">
                 <div className="relative w-24 h-24 rounded-md overflow-hidden flex-shrink-0">
                   <Image
-                    src={hotelData.image}
-                    alt={hotelData.name}
+                    src={hotelDetails.photos[0]}
+                    alt={hotelDetails.property_name}
                     fill
                     className="object-cover"
                   />
                 </div>
                 <div>
-                  <h3 className="font-medium">{hotelData.name}</h3>
+                  <h3 className="font-medium">{hotelDetails.property_name}</h3>
                   <div className="flex items-center text-muted-foreground text-sm mt-1">
                     <MapPin className="h-3 w-3 mr-1" />
-                    {hotelData.location}
+                    {hotelDetails.city}, {hotelDetails.state}
                   </div>
                 </div>
               </div>
@@ -455,7 +473,7 @@ const BookingClientPage = ({id}: {id: number}) => {
               {/* Price Breakdown */}
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span>${hotelData.price} x {nightsCount} nights x {roomCount} {parseInt(roomCount) === 1 ? 'room' : 'rooms'}</span>
+                  <span>${hotelDetails.base_price} x {nightsCount} nights x {roomCount} {parseInt(roomCount) === 1 ? 'room' : 'rooms'}</span>
                   <span>${subtotal}</span>
                 </div>
                 <div className="flex justify-between">

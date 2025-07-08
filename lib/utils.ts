@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { createClient } from './utils/supabase/client';
+import { resend } from './resned';
 
 
 export function cn(...inputs: ClassValue[]) {
@@ -46,4 +47,51 @@ export function transformFeaturedProperty(raw: any) {
     tags: ["Popular", raw.property_type],
     amenities: raw.amenities.slice(0, 5) ?? [],
   };
+}
+
+
+
+
+export async function sendBookingEmail({
+  to,
+  name,
+  bookingId,
+  checkInDate,
+  checkOutDate,
+  rooms,
+  guests,
+}: {
+  to: string;
+  name: string;
+  bookingId: string;
+  checkInDate: Date;
+  checkOutDate: Date;
+  rooms: string;
+  guests: number;
+}) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Hotel Bookings <bookings@yourdomain.com>',
+      to,
+      subject: `Booking Confirmation - #${bookingId}`,
+      html: `
+        <h2>Hi ${name},</h2>
+        <p>Thank you for booking with us! Here are your reservation details:</p>
+        <ul>
+          <li><strong>Booking ID:</strong> ${bookingId}</li>
+          <li><strong>Check-in:</strong> ${checkInDate}</li>
+          <li><strong>Check-out:</strong> ${checkOutDate}</li>
+          <li><strong>Number of rooms:</strong> ${rooms}</li>
+          <li><strong>Guests:</strong> ${guests}</li>
+        </ul>
+        <p>We look forward to hosting you!</p>
+      `,
+    });
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Failed to send email:', err);
+    throw err;
+  }
 }

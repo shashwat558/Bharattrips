@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 
 const BookingConfirmationPage = () => {
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
   const bookingId = searchParams.get('id') || '1'
   
   // In a real app, this would come from an API

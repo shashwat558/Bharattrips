@@ -3,7 +3,7 @@
 import bcrypt from "bcrypt";
 
 import { createClientServer } from "../utils/supabase/server"
-import { transformFeaturedProperty } from "../utils";
+import { sendBookingEmail, transformFeaturedProperty } from "../utils";
 
 export async function initHostOnborading(email: string){
     const supabase = await createClientServer();
@@ -390,7 +390,7 @@ export async function getPropertyReviews(propertyId: string) {
 }
 
 
-    export async function likeReview({reviewId,propertyId,  voteType}: {reviewId: string,propertyId: string, voteType: "like" | "dislike"}) {
+export async function likeReview({reviewId,propertyId,  voteType}: {reviewId: string,propertyId: string, voteType: "like" | "dislike"}) {
         const supabase = await createClientServer();
         const {data} = await supabase.auth.getUser();
         
@@ -431,3 +431,67 @@ export async function getPropertyReviews(propertyId: string) {
     }
 
 
+
+export async function getBookingDetails({propertyId}: {propertyId: string}){
+    const supabase= await createClientServer();
+    
+    const {data, error} = await supabase.from("properties").select("property_name, city, state, photos, base_price, cleaning_fee").eq('id', propertyId).single();
+
+    if(!data || error) {
+        throw new Error(error.message);
+
+    }
+
+    return data;
+
+}
+
+
+export async function confirmHotelBooking({propertyId, checkInDate, checkOutDate, guests, totalPrice, cleaningFee, firstName, lastName, emailAddress, phoneNumber, specialRequirements}: {
+    propertyId: string,
+    checkInDate: Date,
+    checkOutDate: Date,
+    guests: number,
+    totalPrice: number,
+    cleaningFee: number,
+    firstName: string,
+    lastName: string,
+    emailAddress: string,
+    phoneNumber: string,
+    specialRequirements: string
+}) {
+
+    const supabase = await createClientServer();
+    const data = await supabase.auth.getUser();
+    const userId = data.data.user?.id;
+    const {data: bookingData, error} = await supabase.from("bookings").insert({
+
+        user_id: userId,
+        property_id: propertyId,
+        check_in: checkInDate,
+        check_out: checkOutDate,
+        guests: guests,
+        total_price: totalPrice,
+        cleaning_fee: cleaningFee,
+        status: "confirmed",
+        first_name: firstName,
+        last_name: lastName,
+        email_address: emailAddress,
+        phone_number: phoneNumber,
+        special_requirements: specialRequirements
+    }).select('id').single();
+
+    if(!bookingData || error){
+        throw new Error(error.message);
+    }
+    await sendBookingEmail({
+        to: emailAddress,
+        bookingId: bookingData.id,
+        checkInDate: checkInDate,
+        checkOutDate: checkOutDate,
+        guests: guests,
+        name: firstName + lastName,
+
+    })
+
+}
