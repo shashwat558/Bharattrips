@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 
 import { createClientServer } from "../utils/supabase/server"
 import { sendBookingEmail, transformFeaturedProperty } from "../utils";
+import { supabase } from "@/supabase";
 
 export async function initHostOnborading(email: string){
     const supabase = await createClientServer();
@@ -474,7 +475,7 @@ export async function confirmHotelBooking({
   phoneNumber: string,
   specialRequirements: string,
   rooms: number,
-  paymentMethod: "credit_card" | "paypal"
+  paymentMethod: "credit-card" | "paypal"
 }) {
   const supabase = await createClientServer();
   const { data: userData } = await supabase.auth.getUser();
@@ -532,4 +533,49 @@ export async function confirmHotelBooking({
   });
 
   return bookingData.id;
+}
+
+
+export async function bookingDataById({bookingId}: {bookingId: string}) {
+    const supabase = await createClientServer();
+    const {data:propertyId} = await supabase.from("bookings").select("property_id").eq('id',bookingId ).single();
+    const [bookingData, paymentData, propertyData] = await Promise.all([
+        supabase.from("bookings").select("*").eq("id", bookingId).single(),
+        supabase.from("payments").select("*").eq("booking_id", bookingId).single(),
+        supabase.from("properties").select("property_name, photos, address, city, state, pincode, phone_number").eq("id", propertyId?.property_id).single()
+
+    ]);
+
+    if(bookingData.error || paymentData.error){
+        const error = bookingData.error ? bookingData.error : paymentData.error;
+      
+        throw new Error(error?.message);
+    }
+
+    return {
+        bookingData,
+        paymentData,
+        propertyData
+    }
+}
+
+
+
+export async function getUserAllData() {
+    const supabase = await createClientServer();
+    const {data: userData} = await supabase.auth.getUser();
+    const userId = userData.user?.id;
+
+    const {data:fullUserData, error} = await supabase.from("full_user_profile").select('*').eq("user_id", userId);
+
+    if(error || !fullUserData){
+        throw new Error(error.message)
+    }
+
+    return fullUserData;
+
+
+
+
+    
 }

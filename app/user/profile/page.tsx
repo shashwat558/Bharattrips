@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,6 +26,7 @@ import {
   Star,
   ChevronRight
 } from 'lucide-react'
+import { getUserAllData } from '@/lib/actions/host'
 
 // Sample user data - in a real app, this would come from an API
 const userData = {
@@ -93,6 +94,14 @@ export default function ProfilePage() {
       address: userData.address
     }
   })
+
+  useEffect(() => {
+    const getUserData = async() => {
+      const userData = await getUserAllData();
+      console.log(userData)
+    }
+    getUserData()
+  },[])
 
   const onSubmit = (data: any) => {
     console.log(data)

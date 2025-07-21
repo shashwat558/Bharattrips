@@ -130,7 +130,7 @@ const BookingClientPage = ({id, hotelDetails}: {id: string, hotelDetails: hotels
     rooms: parseInt(roomCount),
     specialRequirements: values.specialRequests ?? "",
     totalPrice: total,
-    paymentMethod: values.paymentMethod as "credit_card" | "paypal"
+    paymentMethod: values.paymentMethod as "credit-card" | "paypal"
   });
 
   router.push(`/booking/confirmation?id=${bookingId}`);

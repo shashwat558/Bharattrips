@@ -91,7 +91,7 @@ const Header = () => {
               </Link>
             ) : (
               <>
-                <Link href={user?"/profile" : "/login"}>
+                <Link href={user?"/user/profile" : "/login"}>
                   {user ? <Button>
                     <User2 className='w-5 h-4'/>
                   </Button>:<Button className={cn(

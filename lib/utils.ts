@@ -71,7 +71,7 @@ export async function sendBookingEmail({
 }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Hotel Bookings <bookings@yourdomain.com>',
+      from: 'Acme <onboarding@resend.dev>',
       to,
       subject: `Booking Confirmation - #${bookingId}`,
       html: `
