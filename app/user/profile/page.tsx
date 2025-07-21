@@ -13,100 +13,167 @@ import { Badge } from '@/components/ui/badge'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  CreditCard, 
-  Bell, 
-  Shield, 
-  Hotel,
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  CreditCard,
+  Bell,
+  Shield,
   Calendar,
   Star,
   ChevronRight
 } from 'lucide-react'
-import { getUserAllData } from '@/lib/actions/host'
+import { getUserAllData } from '@/lib/actions/host' 
 
-// Sample user data - in a real app, this would come from an API
-const userData = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  phone: "+1 (555) 123-4567",
-  address: "123 Luxury Avenue, New York, NY 10001",
-  avatar: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg",
-  memberSince: "2023",
-  tier: "Gold Member",
-  points: 2500,
-  upcomingBookings: [
-    {
-      id: 1,
-      hotel: "Grand Plaza Hotel & Spa",
-      location: "Paris, France",
-      dates: "Aug 15 - Aug 18, 2025",
-      image: "https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg",
-      status: "confirmed"
-    },
-    {
-      id: 2,
-      hotel: "Ocean View Resort",
-      location: "Bali, Indonesia",
-      dates: "Sep 20 - Sep 25, 2025",
-      image: "https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg",
-      status: "pending"
-    }
-  ],
-  pastBookings: [
-    {
-      id: 3,
-      hotel: "Mountain Retreat Lodge",
-      location: "Aspen, Colorado",
-      dates: "Dec 10 - Dec 15, 2024",
-      image: "https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg",
-      rating: 5
-    },
-    {
-      id: 4,
-      hotel: "Urban Boutique Hotel",
-      location: "London, UK",
-      dates: "Oct 5 - Oct 8, 2024",
-      image: "https://images.pexels.com/photos/1579253/pexels-photo-1579253.jpeg",
-      rating: 4
-    }
-  ]
-}
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   phone: z.string().optional(),
+  
   address: z.string().optional()
 })
 
+
+interface UserProfileData {
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string; 
+  memberSince?: string;
+  tier?: string;
+  points?: number;
+  upcomingBookings: Booking[];
+  pastBookings: Booking[];
+  created_at: Date
+}
+
+interface Booking {
+  id: string | number;
+  hotel: string; 
+  location: string;
+  dates: string; 
+  image: string; 
+  status: string;
+  rating?: number; 
+}
+
 export default function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false)
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const [isEditing, setIsEditing] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfileData | null>(null);
+
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: userData.name,
-      email: userData.email,
-      phone: userData.phone,
-      address: userData.address
-    }
-  })
+    
+  });
 
   useEffect(() => {
-    const getUserData = async() => {
-      const userData = await getUserAllData();
-      console.log(userData)
-    }
-    getUserData()
-  },[])
+    const fetchUserData = async () => {
+      try {
+        const fetchedBookings = await getUserAllData();
+        console.log("Fetched Booking Data:", fetchedBookings);
 
-  const onSubmit = (data: any) => {
-    console.log(data)
-    // In a real app, this would make an API call
-    setIsEditing(false)
+        if (fetchedBookings && fetchedBookings.length > 0) {
+          const firstBooking = fetchedBookings[0]; 
+
+          
+          const upcoming = fetchedBookings.filter((booking: any) => new Date(booking.check_in) >= new Date())
+            .map((booking: any) => ({
+              id: booking.booking_id,
+              hotel: booking.property_name,
+              location: `${booking.city}, ${booking.state}`, 
+              dates: `${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}`,
+              image: booking.photos && booking.photos.length > 0 ? booking.photos[0] : '/placeholder-hotel.jpg',
+              status: booking.status
+            }));
+
+          const past = fetchedBookings.filter((booking: any) => new Date(booking.check_in) < new Date())
+            .map((booking: any) => ({
+              id: booking.booking_id,
+              hotel: booking.property_name,
+              location: `${booking.city}, ${booking.state}`, 
+              dates: `${new Date(booking.check_in).toLocaleDateString()} - ${new Date(booking.check_out).toLocaleDateString()}`,
+              image: booking.photos && booking.photos.length > 0 ? booking.photos[0] : '/placeholder-hotel.jpg',
+              rating: 5 
+            }));
+
+          const transformedData: UserProfileData = {
+            name: firstBooking.name || "Guest User",
+            email: firstBooking.email || "guest@example.com",
+            phone: "+1 (555) 123-4567", 
+            address: "", 
+            avatar: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg", 
+            memberSince: firstBooking.created_at ? new Date(firstBooking.created_at).getFullYear().toString() : "2024", 
+            tier: "Gold Member", 
+            points: 2500, 
+            upcomingBookings: upcoming,
+            pastBookings: past
+          };
+          setUserProfile(transformedData);
+          reset({
+            name: transformedData.name,
+            email: transformedData.email,
+            phone: transformedData.phone,
+            address: transformedData.address
+          });
+        } else {
+            
+            setUserProfile({
+                name: "New User",
+                email: "user@example.com",
+                upcomingBookings: [],
+                pastBookings: [],
+                address: "",
+                phone: "",
+                created_at: new Date()
+            });
+            reset({
+                name: "New User",
+                email: "user@example.com",
+                address: "",
+                phone: ""
+            });
+        }
+
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        
+        setUserProfile({
+            name: "Error User",
+            email: "error@example.com",
+            upcomingBookings: [],
+            pastBookings: [],
+            address: "Error loading address",
+            phone: "Error loading phone",
+            created_at: new Date()
+            
+        });
+        reset({
+            name: "Error User",
+            email: "error@example.com",
+            address: "Error loading address",
+            phone: "Error loading phone"
+        });
+      }
+    };
+    fetchUserData();
+  }, [reset]);
+
+  const onSubmit = (data: z.infer<typeof profileSchema>) => {
+    console.log("Updated Profile Data:", data);
+   
+    setIsEditing(false);
+  };
+
+  
+  if (!userProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/40">
+        <p>Loading user data...</p>
+      </div>
+    );
   }
 
   return (
@@ -119,12 +186,12 @@ export default function ProfilePage() {
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center">
                   <Avatar className="w-24 h-24 mb-4">
-                    <AvatarImage src={userData.avatar} alt={userData.name} />
-                    <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={userProfile.avatar || "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"} alt={userProfile.name} />
+                    <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <h2 className="font-playfair text-2xl font-bold">{userData.name}</h2>
-                  <p className="text-muted-foreground">{userData.email}</p>
-                  <Badge className="mt-2" variant="secondary">{userData.tier}</Badge>
+                  <h2 className="font-playfair text-2xl font-bold">{userProfile.name}</h2>
+                  <p className="text-muted-foreground">{userProfile.email}</p>
+                  <Badge className="mt-2" variant="secondary">{userProfile.tier}</Badge>
                 </div>
 
                 <Separator className="my-6" />
@@ -136,7 +203,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Reward Points</p>
-                      <p className="font-medium">{userData.points} points</p>
+                      <p className="font-medium">{userProfile.points} points</p>
                     </div>
                   </div>
 
@@ -146,7 +213,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Member Since</p>
-                      <p className="font-medium">{userData.memberSince}</p>
+                      <p className="font-medium">{userProfile.memberSince}</p>
                     </div>
                   </div>
                 </div>
@@ -192,38 +259,42 @@ export default function ProfilePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
-                      {userData.upcomingBookings.map((booking) => (
-                        <div key={booking.id} className="flex gap-4">
-                          <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                            <Image
-                              src={booking.image}
-                              alt={booking.hotel}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">{booking.hotel}</h3>
-                            <div className="flex items-center text-sm text-muted-foreground mt-1">
-                              <MapPin className="h-4 w-4 mr-1" />
-                              {booking.location}
+                      {userProfile.upcomingBookings.length > 0 ? (
+                        userProfile.upcomingBookings.map((booking) => (
+                          <div key={booking.id} className="flex gap-4">
+                            <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                              <Image
+                                src={booking.image}
+                                alt={booking.hotel}
+                                fill
+                                className="object-cover"
+                              />
                             </div>
-                            <div className="flex items-center text-sm mt-1">
-                              <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
-                              {booking.dates}
+                            <div className="flex-1">
+                              <h3 className="font-medium">{booking.hotel}</h3>
+                              <div className="flex items-center text-sm text-muted-foreground mt-1">
+                                <MapPin className="h-4 w-4 mr-1" />
+                                {booking.location}
+                              </div>
+                              <div className="flex items-center text-sm mt-1">
+                                <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+                                {booking.dates}
+                              </div>
+                              <Badge
+                                variant={booking.status === 'confirmed' ? 'default' : 'secondary'}
+                                className="mt-2"
+                              >
+                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                              </Badge>
                             </div>
-                            <Badge 
-                              variant={booking.status === 'confirmed' ? 'default' : 'secondary'}
-                              className="mt-2"
-                            >
-                              {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                            </Badge>
+                            <Button variant="ghost" size="icon">
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button variant="ghost" size="icon">
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground">No upcoming bookings.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -236,44 +307,48 @@ export default function ProfilePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
-                      {userData.pastBookings.map((booking) => (
-                        <div key={booking.id} className="flex gap-4">
-                          <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                            <Image
-                              src={booking.image}
-                              alt={booking.hotel}
-                              fill
-                              className="object-cover"
-                            />
+                      {userProfile.pastBookings.length > 0 ? (
+                        userProfile.pastBookings.map((booking) => (
+                          <div key={booking.id} className="flex gap-4">
+                            <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                              <Image
+                                src={booking.image}
+                                alt={booking.hotel}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium">{booking.hotel}</h3>
+                              <div className="flex items-center text-sm text-muted-foreground mt-1">
+                                <MapPin className="h-4 w-4 mr-1" />
+                                {booking.location}
+                              </div>
+                              <div className="flex items-center text-sm mt-1">
+                                <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+                                {booking.dates}
+                              </div>
+                              <div className="flex items-center mt-2">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < (booking.rating || 0)
+                                        ? "text-accent fill-accent"
+                                        : "text-muted"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <Button variant="ghost" size="icon">
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">{booking.hotel}</h3>
-                            <div className="flex items-center text-sm text-muted-foreground mt-1">
-                              <MapPin className="h-4 w-4 mr-1" />
-                              {booking.location}
-                            </div>
-                            <div className="flex items-center text-sm mt-1">
-                              <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
-                              {booking.dates}
-                            </div>
-                            <div className="flex items-center mt-2">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`h-4 w-4 ${
-                                    i < booking.rating 
-                                      ? "text-accent fill-accent" 
-                                      : "text-muted"
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="icon">
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground">No past bookings.</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -287,7 +362,7 @@ export default function ProfilePage() {
                         <CardTitle>Profile Information</CardTitle>
                         <CardDescription>Update your personal details</CardDescription>
                       </div>
-                      <Button 
+                      <Button
                         variant={isEditing ? "ghost" : "outline"}
                         onClick={() => setIsEditing(!isEditing)}
                       >

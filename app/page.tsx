@@ -19,6 +19,7 @@ import FeaturedProperties from '@/components/home/featured-properties'
 import Testimonials from '@/components/home/testimonials'
 import Newsletter from '@/components/home/newsletter'
 import { useAuth } from '@/stores/useAuth'
+import Header from '@/components/layout/header'
 
 
 
@@ -28,6 +29,7 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
+      <Header />
       <section className="relative h-[85vh] min-h-[600px] hero-overlay">
         <Image
           src="/heroImage.jpeg"
