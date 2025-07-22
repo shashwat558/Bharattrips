@@ -1,4 +1,5 @@
-  import React from 'react'
+  "use client";
+  import React, { useEffect, useState } from 'react'
   import { Card, CardContent } from '@/components/ui/card'
   import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
   import {
@@ -20,10 +21,13 @@
   import RevenueSummary from '@/components/admin/revenue-summary'
   import PropertiesStats from '@/components/admin/properties-stats'
   import AdminLayout from './admin-layout'
+import { createClient } from '@/lib/utils/supabase/client';
+import { notFound } from 'next/navigation';
 
   export default function AdminDashboard() {
-
     
+
+
     return (
       <AdminLayout 
         title="Dashboard" 

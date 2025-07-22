@@ -573,9 +573,44 @@ export async function getUserAllData() {
     }
 
     return fullUserData;
+}
+
+export async function checkHost(){
+    const supabase = await createClientServer();
+    const {data} = await supabase.auth.getUser()
+    const {data:userData, error} = await supabase.from("users").select("role").eq("id", data.user?.id).single();
+
+    console.log(userData?.role + "this is user role")
+
+    if(userData?.role === "host"){
+        return {
+            isHost: true
+        }
+    } else {
+        return {
+            isHost: false
+        }
+    }
+}
 
 
+export async function  getHostProperties() {
+    const supabase = await createClientServer();
+    const {data: {user}} = await supabase.auth.getUser();
+    const {data: properties, error} = await supabase.from("properties").select("*").eq("user_id", user?.id);
+
+    if(error || !properties) {
+        throw new Error(error.message)
+    }
+    
+    return properties;
 
 
+    
+}
+
+
+export async function updatePropertyDetails() {
+    const supabase = await createClientServer();
     
 }

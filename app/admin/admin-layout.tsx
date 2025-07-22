@@ -1,13 +1,17 @@
 
 "use client" 
 
-import React, { useState } from 'react'
+
+import React, { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
 import { Sheet, SheetTrigger } from '@/components/ui/sheet' 
 import AdminSidebar from '@/components/admin/admin-sidebar'
 import AdminHeader from '@/components/admin/admin-header'
+import { redirect } from 'next/navigation'
+import { checkHost } from '@/lib/actions/host'
+
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -18,12 +22,29 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children, title, description }: AdminLayoutProps) {
   
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
- 
+  const [isAdmin, setIsAdmin] = useState(false)
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
 
   const toggleDesktopSidebar = () => {
     setIsDesktopSidebarOpen(!isDesktopSidebarOpen);
   };
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const check = await checkHost();
+      if(check.isHost){
+        setIsAdmin(true)
+      }
+      
+    }
+    checkAdmin()
+  },[])
+
+  if(!isAdmin){
+    redirect("/")
+  }
+
+
 
   return (
     <>

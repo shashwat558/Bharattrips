@@ -50,6 +50,8 @@ const Header = () => {
       const locationArray = window.location.href.split('/');
       if (locationArray.includes("list-property")) {
         setShouldHideHeader(true);
+      } else if(locationArray.includes("admin")) {
+        setShouldHideHeader(true)
       }
     }
   }, [])
