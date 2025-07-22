@@ -614,3 +614,29 @@ export async function updatePropertyDetails() {
     const supabase = await createClientServer();
     
 }
+
+export async function getHostPropertyBooking() {
+    const supabase = await createClientServer();
+    const {data: {user}} = await supabase.auth.getUser();
+    const userId = user?.id;
+
+    const { data, error } = await supabase
+  .from('properties')
+  .select(`
+    property_name,
+    address,
+    photos,
+    bookings (
+      *,
+      user:users(name, email, phone_number)
+    )
+  `)
+  .eq('user_id', userId)
+  .not('bookings', 'is', null);
+
+    if(error || !data) {
+        throw new Error(error.message)
+    }
+
+    return data;
+}

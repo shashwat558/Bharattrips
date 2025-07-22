@@ -22,27 +22,14 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children, title, description }: AdminLayoutProps) {
   
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false)
+    
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
 
   const toggleDesktopSidebar = () => {
     setIsDesktopSidebarOpen(!isDesktopSidebarOpen);
   };
 
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const check = await checkHost();
-      if(check.isHost){
-        setIsAdmin(true)
-      }
-      
-    }
-    checkAdmin()
-  },[])
-
-  if(!isAdmin){
-    redirect("/")
-  }
+ 
 
 
 
