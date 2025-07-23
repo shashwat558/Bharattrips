@@ -32,7 +32,7 @@ export default function Home() {
       <Header />
       <section className="relative h-[85vh] min-h-[600px] hero-overlay">
         <Image
-          src="/heroImage.jpeg"
+          src="/heroImage.png"
           alt="Luxury Hotel"
           fill
 

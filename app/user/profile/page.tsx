@@ -26,6 +26,7 @@ import {
   ChevronRight
 } from 'lucide-react'
 import { getUserAllData } from '@/lib/actions/host' 
+import Link from 'next/link'
 
 
 const profileSchema = z.object({
@@ -47,7 +48,8 @@ interface UserProfileData {
   points?: number;
   upcomingBookings: Booking[];
   pastBookings: Booking[];
-  created_at: Date
+  created_at: Date,
+  role?: "host" | "guest"
 }
 
 interface Booking {
@@ -109,7 +111,9 @@ export default function ProfilePage() {
             tier: "Gold Member", 
             points: 2500, 
             upcomingBookings: upcoming,
-            pastBookings: past
+            pastBookings: past,
+            role: firstBooking.role
+            
           };
           setUserProfile(transformedData);
           reset({
@@ -127,7 +131,8 @@ export default function ProfilePage() {
                 pastBookings: [],
                 address: "",
                 phone: "",
-                created_at: new Date()
+                created_at: new Date(),
+                
             });
             reset({
                 name: "New User",
@@ -219,6 +224,7 @@ export default function ProfilePage() {
                 </div>
 
                 <Button className="w-full mt-6">View Rewards</Button>
+                {userProfile.role==="host" && <Link href={"/admin"}> <Button className="w-full mt-6">Host Dashboard</Button></Link>}
               </CardContent>
             </Card>
 

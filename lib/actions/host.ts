@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 
 import { createClientServer } from "../utils/supabase/server"
 import { sendBookingEmail, transformFeaturedProperty } from "../utils";
-import { supabase } from "@/supabase";
+
 
 export async function initHostOnborading(email: string){
     const supabase = await createClientServer();
@@ -639,4 +639,97 @@ export async function getHostPropertyBooking() {
     }
 
     return data;
+}
+
+
+type CustomerSummary = {
+  id: string;
+  name: string;
+  email: string;
+  totalBookings: number;
+  totalSpent: number;
+  phone: string
+  
+};
+
+type BookingRecord = {
+  user_id: string;
+  total_price: number;
+  created_at: string;
+  users: {
+    id: string;
+    name: string;
+    email: string;
+    phone_number: string;
+  };
+  properties: {
+    id: string;
+    user_id: string;
+  };
+ 
+};
+
+
+
+export async function getCustomersDetails() {
+    const supabase = await createClientServer();
+    const {data: {user}} = await supabase.auth.getUser();
+
+    const hostId = user?.id;
+
+    
+
+
+
+const { data, error } = await supabase
+  .from("bookings")
+  .select(`
+    user_id,
+    total_price,
+    created_at,
+    users (id, name, email, phone_number),
+    properties!bookings_property_id_fkey (id, user_id)
+    
+  `)
+  .eq("properties.user_id", hostId);
+
+        if (error || !data) {
+        throw new Error(error?.message ?? "Unknown Supabase error");
+        }
+
+        const customerMap: Record<string, CustomerSummary> = {};
+
+        (data as unknown as BookingRecord[]).forEach((booking) => {
+        const user = booking.users;
+        if (!user) return;
+
+        const userId = user.id;
+
+        if (!customerMap[userId]) {
+            customerMap[userId] = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone_number,
+            totalBookings: 0,
+            totalSpent: 0,
+            
+            };
+        }
+
+        customerMap[userId].totalBookings += 1;
+        customerMap[userId].totalSpent += booking.total_price || 0;
+
+       
+        });
+
+
+        const customers = Object.values(customerMap).map(user => ({
+        ...user,
+        
+        }));
+
+        console.log(customers);
+        return customers;
+
 }

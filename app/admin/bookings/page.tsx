@@ -28,7 +28,6 @@ import {
   Filter,
   MoreHorizontal,
   Eye,
-  Edit,
   Trash2,
   MapPin,
   Calendar,
@@ -47,7 +46,7 @@ import { format, parseISO } from 'date-fns'
 import AdminLayout from '../admin-layout'
 import { getHostPropertyBooking } from '@/lib/actions/host'
 
-
+// Shadcn UI components for dialogs/modals
 import {
   Dialog,
   DialogContent,
@@ -56,16 +55,8 @@ import {
   DialogTitle,
   DialogFooter
 } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
+// import { toast } from '@/components/ui/use-toast'
 
 
 const getStatusColor = (status: string) => {
@@ -122,12 +113,10 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // State for modals
+  
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
-  const [isEditBookingOpen, setIsEditBookingOpen] = useState(false);
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const [editBookingForm, setEditBookingForm] = useState<any>(null);
 
 
   useEffect(() => {
@@ -144,8 +133,8 @@ export default function BookingsPage() {
               ...booking,
               property_name: property.property_name,
               property_address: property.address,
-              property_image: property.photos
-              // For now, using a placeholder/no image for property in booking table
+              property_image: property.photos[0]
+             
             }))
           );
           setAllBookings(flattened);
@@ -163,6 +152,7 @@ export default function BookingsPage() {
     fetchBookings();
   }, [])
 
+  
   const stats = {
     total: allBookings.length,
     confirmed: allBookings.filter(b => b.status === 'confirmed').length,
@@ -171,74 +161,18 @@ export default function BookingsPage() {
     cancelled: allBookings.filter(b => b.status === 'cancelled').length,
   }
 
- 
+  
 
   const handleViewDetails = (booking: any) => {
     setSelectedBooking(booking);
     setIsViewDetailsOpen(true);
   };
 
-  const handleEditBooking = (booking: any) => {
-    setSelectedBooking(booking);
-    // Initialize form with current booking data for editing
-    setEditBookingForm({
-      id: booking.id,
-      status: booking.status,
-      first_name: booking.first_name,
-      last_name: booking.last_name,
-      email_address: booking.email_address,
-      phone_number: booking.phone_number,
-      special_requirements: booking.special_requirements,
-      // Add other editable fields as needed
-    });
-    setIsEditBookingOpen(true);
-  };
-
-  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setEditBookingForm((prev: any) => ({ ...prev, [name]: value }));
-  };
-
-  const handleEditStatusChange = (value: string) => {
-    setEditBookingForm((prev: any) => ({ ...prev, status: value }));
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editBookingForm) return;
-
-    
-    setLoading(true); 
-    try {
-      
-      console.log("Saving changes for booking:", editBookingForm.id, editBookingForm);
-      await new Promise(resolve => setTimeout(resolve, 800)); 
-
-      
-      setAllBookings(prevBookings =>
-        prevBookings.map(b => (b.id === editBookingForm.id ? { ...b, ...editBookingForm } : b))
-      );
-
-      toast({
-        title: "Booking Updated!",
-        description: `Booking ${editBookingForm.id} has been updated.`,
-      });
-      setIsEditBookingOpen(false);
-    } catch (error) {
-      console.error("Error saving booking edit:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save booking changes. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleConfirmBooking = async (bookingId: string) => {
     setLoading(true);
     try {
       console.log(`Confirming booking ${bookingId}`);
+      
       await new Promise(resolve => setTimeout(resolve, 800));
       setAllBookings(prevBookings =>
         prevBookings.map(b => (b.id === bookingId ? { ...b, status: 'confirmed' } : b))
@@ -263,6 +197,7 @@ export default function BookingsPage() {
     setLoading(true);
     try {
       console.log(`Declining booking ${bookingId}`);
+      
       await new Promise(resolve => setTimeout(resolve, 800));
       setAllBookings(prevBookings =>
         prevBookings.map(b => (b.id === bookingId ? { ...b, status: 'declined' } : b))
@@ -296,7 +231,7 @@ export default function BookingsPage() {
     try {
       
       console.log(`Cancelling booking ${selectedBooking.id}`);
-      await new Promise(resolve => setTimeout(resolve, 800)); 
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       setAllBookings(prevBookings =>
         prevBookings.map(b => (b.id === selectedBooking.id ? { ...b, status: 'cancelled' } : b))
@@ -324,7 +259,7 @@ export default function BookingsPage() {
     
     toast({
       title: "Contact Guest",
-      description: `Simulating contacting ${booking.first_name} ${booking.last_name} via ${booking.email_address} or ${booking.phone_number}`,
+      description: `Simulating contacting ${booking.first_name || booking.user?.name || 'guest'} via email/phone.`,
     });
     console.log("Contacting guest:", booking.user?.email || booking.email_address, booking.user?.phone_number || booking.phone_number);
   };
@@ -355,7 +290,7 @@ export default function BookingsPage() {
       title="Bookings"
       description="Manage all property bookings"
     >
-     
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <Card>
           <CardContent className="p-4">
@@ -399,7 +334,7 @@ export default function BookingsPage() {
         </Card>
       </div>
 
-      
+     
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex flex-1 items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
@@ -415,7 +350,7 @@ export default function BookingsPage() {
         </div>
       </div>
 
-     
+      
       <Card>
         <CardHeader>
           <CardTitle>All Bookings</CardTitle>
@@ -448,7 +383,7 @@ export default function BookingsPage() {
                 const guestName = `${booking.first_name || ''} ${booking.last_name || ''}`.trim();
                 const guestEmail = booking.email_address || booking.user?.email || 'N/A';
                 const guestPhone = booking.phone_number || booking.user?.phone_number || 'N/A';
-                const propertyImage = "/placeholder-property.jpg"; // Placeholder
+                const propertyImage = booking.property_image;
 
 
                 return (
@@ -462,7 +397,7 @@ export default function BookingsPage() {
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src="" alt={guestName} /> {/* No guest image in data */}
+                          <AvatarImage src="" alt={guestName} />
                           <AvatarFallback>{guestName.charAt(0) || 'G'}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -530,12 +465,6 @@ export default function BookingsPage() {
                         </div>
                       </Badge>
                     </TableCell>
-                    {/* Hiding payment status column as it's not in the provided data */}
-                    {/* <TableCell>
-                      <Badge className={getPaymentStatusColor(booking.paymentStatus || 'unknown')}>
-                        {(booking.paymentStatus || 'Unknown').charAt(0).toUpperCase() + (booking.paymentStatus || 'Unknown').slice(1)}
-                      </Badge>
-                    </TableCell> */}
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -550,6 +479,7 @@ export default function BookingsPage() {
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
+                          
                           {booking.status === 'pending' && (
                             <>
                               <DropdownMenuItem onClick={() => handleConfirmBooking(booking.id)}>
@@ -562,10 +492,6 @@ export default function BookingsPage() {
                               </DropdownMenuItem>
                             </>
                           )}
-                          <DropdownMenuItem onClick={() => handleEditBooking(booking)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Booking
-                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleContactGuest(booking)}>
                             <Mail className="mr-2 h-4 w-4" />
                             Contact Guest
@@ -574,7 +500,8 @@ export default function BookingsPage() {
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => handleCancelBooking(booking)}
-                            disabled={booking.status === 'cancelled' || booking.status === 'completed'}
+                            
+                            disabled={['cancelled', 'completed', 'declined'].includes(booking.status)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Cancel Booking
@@ -597,7 +524,7 @@ export default function BookingsPage() {
         </CardContent>
       </Card>
 
-    
+     
       <Dialog open={isViewDetailsOpen} onOpenChange={setIsViewDetailsOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
@@ -614,7 +541,7 @@ export default function BookingsPage() {
                   <p><strong>Name:</strong> {selectedBooking.first_name} {selectedBooking.last_name}</p>
                   <p><strong>Email:</strong> {selectedBooking.email_address}</p>
                   <p><strong>Phone:</strong> {selectedBooking.phone_number}</p>
-                  <p><strong>Booked By:</strong> {selectedBooking.user?.name || 'N/A'}</p>
+                  <p><strong>Booked By User:</strong> {selectedBooking.user?.name || 'N/A'}</p>
                   <p><strong>User Phone:</strong> {selectedBooking.user?.phone_number || 'N/A'}</p>
                 </div>
                 <div>
@@ -651,113 +578,6 @@ export default function BookingsPage() {
           )}
           <DialogFooter>
             <Button onClick={() => setIsViewDetailsOpen(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-     
-      <Dialog open={isEditBookingOpen} onOpenChange={setIsEditBookingOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Edit Booking: {selectedBooking?.id}</DialogTitle>
-            <DialogDescription>
-              Make changes to this booking's details.
-            </DialogDescription>
-          </DialogHeader>
-          {editBookingForm && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="status" className="text-right">
-                  Status
-                </Label>
-                <Select
-                  name="status"
-                  value={editBookingForm.status}
-                  onValueChange={handleEditStatusChange}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                    <SelectItem value="declined">Declined</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="first_name" className="text-right">
-                  Guest Name
-                </Label>
-                <Input
-                  id="first_name"
-                  name="first_name"
-                  value={editBookingForm.first_name || ''}
-                  onChange={handleEditFormChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="last_name" className="text-right">
-                  Last Name
-                </Label>
-                <Input
-                  id="last_name"
-                  name="last_name"
-                  value={editBookingForm.last_name || ''}
-                  onChange={handleEditFormChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email_address" className="text-right">
-                  Email
-                </Label>
-                <Input
-                  id="email_address"
-                  name="email_address"
-                  type="email"
-                  value={editBookingForm.email_address || ''}
-                  onChange={handleEditFormChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="phone_number" className="text-right">
-                  Phone
-                </Label>
-                <Input
-                  id="phone_number"
-                  name="phone_number"
-                  type="tel"
-                  value={editBookingForm.phone_number || ''}
-                  onChange={handleEditFormChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="special_requirements" className="text-right pt-2">
-                  Requirements
-                </Label>
-                <Textarea
-                  id="special_requirements"
-                  name="special_requirements"
-                  value={editBookingForm.special_requirements || ''}
-                  onChange={handleEditFormChange}
-                  className="col-span-3"
-                  rows={3}
-                />
-              </div>
-              
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditBookingOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveEdit} disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
