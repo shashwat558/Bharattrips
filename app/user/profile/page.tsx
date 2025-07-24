@@ -111,6 +111,7 @@ export default function ProfilePage() {
             tier: "Gold Member", 
             points: 2500, 
             upcomingBookings: upcoming,
+            //@ts-ignore
             pastBookings: past,
             role: firstBooking.role
             
@@ -191,7 +192,7 @@ export default function ProfilePage() {
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center">
                   <Avatar className="w-24 h-24 mb-4">
-                    <AvatarImage src={userProfile.avatar || "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"} alt={userProfile.name} />
+                    <AvatarImage src={"https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"} alt={userProfile.name} />
                     <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <h2 className="font-playfair text-2xl font-bold">{userProfile.name}</h2>

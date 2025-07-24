@@ -246,7 +246,8 @@ export default async function HotelDetailPage({ params }: { params: Promise<{   
                   <div>
                     <h3 className="font-playfair text-xl font-bold mb-4">Languages Spoken</h3>
                     <div className="flex flex-wrap gap-2">
-                      {property.languages.map((language, i) => (
+                      
+                      {property.languages.map((language: string, i: number) => (
                         <Badge key={i} variant="outline">{language}</Badge>
                       ))}
                     </div>
@@ -269,7 +270,7 @@ export default async function HotelDetailPage({ params }: { params: Promise<{   
                 <div className="space-y-6">
                   <h2 className="font-playfair text-2xl font-bold mb-4">Property Amenities</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {property.amenities.map((amenity, i) => (
+                    {property.amenities.map((amenity: string, i: number) => (
                       <div key={i} className="flex items-center gap-3 p-4 rounded-lg bg-card border">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                           {getAmenityIcon(amenity)}
